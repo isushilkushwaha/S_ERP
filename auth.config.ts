@@ -1,106 +1,155 @@
-
-
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+
+import { prisma } from "@/lib/prisma";
+import { ROLE_PERMISSIONS } from "@/lib/rbac/role-permissions";
+import type { Permission } from "@/lib/rbac/permissions";
 
 export const authConfig = {
   providers: [
     Credentials({
       name: "Credentials",
+
       credentials: {
-        login: { label: "Email or Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        login: {
+          label: "Email or Username",
+          type: "text",
+        },
+
+        password: {
+          label: "Password",
+          type: "password",
+        },
       },
+
       async authorize(credentials) {
         const parsed = z
           .object({
-            login: z.string().min(1, "Email or username is required"),
-            password: z.string().min(1, "Password is required"),
+            login: z
+              .string()
+              .min(1, "Email or username is required"),
+
+            password: z
+              .string()
+              .min(1, "Password is required"),
           })
           .safeParse(credentials);
 
-        if (!parsed.success) return null;
+        if (!parsed.success) {
+          return null;
+        }
 
         const { login, password } = parsed.data;
 
         const user = await prisma.user.findFirst({
           where: {
             deletedAt: null,
-            OR: [{ email: login }, { username: login }],
+            OR: [
+              {
+                email: login,
+              },
+              {
+                username: login,
+              },
+            ],
           },
-          include: { role: true },
+
+          include: {
+            role: true,
+          },
         });
 
-        if (!user || !user.isActive) return null;
+        if (!user || !user.isActive) {
+          return null;
+        }
 
-        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-        if (!isValidPassword) return null;
+        const passwordMatched = await bcrypt.compare(
+          password,
+          user.passwordHash
+        );
+
+        if (!passwordMatched) {
+          return null;
+        }
 
         await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() },
+          where: {
+            id: user.id,
+          },
+
+          data: {
+            lastLoginAt: new Date(),
+          },
         });
+
+        const role = user.role.name;
+
+        const permissions = [
+          ...(
+            ROLE_PERMISSIONS[
+              role as keyof typeof ROLE_PERMISSIONS
+            ] ?? []
+          ),
+        ];
 
         return {
           id: user.id,
+
           name: user.fullName,
+
           email: user.email,
+
           username: user.username,
-          role: user.role.name,
+
+          role,
+
           isActive: user.isActive,
+
+          permissions,
         };
       },
     }),
   ],
-  // Callbacks are defined at the root level of authConfig, next to providers
-  // callbacks: {
-  //   async jwt({ token, user }) {
-  //     if (user) {
-  //       token.id = user.id;
-  //       token.role = (user as any).role;
-  //       token.username = (user as any).username;
-  //       token.isActive = (user as any).isActive;
-  //     }
-  //     return token;
-  //   },
-  //   async session({ session, token }) {
-  //     if (session.user) {
-  //       session.user.id = token.id as string;
-  //       session.user.role = token.role as string;
-  //       session.user.username = token.username as string;
-  //       session.user.isActive = token.isActive as boolean;
-  //     }
-  //     return session;
-  //   },
-  // },
 
-  // auth.config.ts
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
 
-callbacks: {
-  async jwt({ token, user }) {
-    // When a user signs in, the 'user' object is available
-    if (user) {
-      token.id = user.id;
-      token.role = user.role;
-      token.username = user.username;
-      token.isActive = user.isActive;
-    }
-    return token;
+        token.role = user.role;
+
+        token.username = user.username;
+
+        token.isActive = user.isActive;
+
+        token.permissions = user.permissions;
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+
+        session.user.role = token.role as string;
+
+        session.user.username = token.username as string;
+
+        session.user.isActive =
+          token.isActive as boolean;
+
+        session.user.permissions =
+          (token.permissions as Permission[]) ?? [];
+      }
+
+      return session;
+    },
   },
-  async session({ session, token }) {
-    // Populate the session object from the JWT token
-    if (session.user) {
-      session.user.id = token.id;
-      session.user.role = token.role;
-      session.user.username = token.username;
-      session.user.isActive = token.isActive;
-    }
-    return session;
+
+  pages: {
+    signIn: "/login",
   },
-},
-
-
 } satisfies NextAuthConfig;

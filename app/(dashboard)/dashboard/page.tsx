@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-import { AdminDashboard } from "@/components/AdminDashboard";
-import { TeacherDashboard } from "@/components/TeacherDashboard";
+import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
+import { TeacherDashboard } from "@/components/dashboard/TeacherDashboard";
 
 export default async function DashboardPage() {
   const session = await auth();

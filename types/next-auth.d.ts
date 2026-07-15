@@ -1,5 +1,7 @@
+
 import "next-auth";
 import "next-auth/jwt";
+import type { Permission } from "@/lib/rbac/permissions";
 
 declare module "next-auth" {
   interface Session {
@@ -8,6 +10,10 @@ declare module "next-auth" {
       role: string;
       username: string;
       isActive: boolean;
+
+      // NEW
+      permissions: Permission[];
+
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -19,6 +25,9 @@ declare module "next-auth" {
     role: string;
     username: string;
     isActive: boolean;
+
+    // NEW
+    permissions: Permission[];
   }
 }
 
@@ -28,5 +37,8 @@ declare module "next-auth/jwt" {
     role: string;
     username: string;
     isActive: boolean;
+
+    // NEW
+    permissions: Permission[];
   }
 }

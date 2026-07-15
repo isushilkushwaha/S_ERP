@@ -1,22 +1,26 @@
-import { ReactNode } from "react";
-import { redirect } from "next/navigation";
+
+
+import type { Metadata } from "next";
 
 import { auth } from "@/auth";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DashboardLayout } from "@/components/dashboard/layout/dashboard-layout";
+
+export const metadata: Metadata = {
+  title: "School Management System | Dashboard",
+  description: "Manage your school operations efficiently.",
+};
+
+interface DashboardRouteLayoutProps {
+  children: React.ReactNode;
+}
 
 export default async function Layout({
   children,
-}: {
-  children: ReactNode;
-}) {
+}: DashboardRouteLayoutProps) {
   const session = await auth();
 
-  if (!session?.user) {
-    redirect("/login");
-  }
-
   return (
-    <DashboardLayout>
+    <DashboardLayout session={session}>
       {children}
     </DashboardLayout>
   );

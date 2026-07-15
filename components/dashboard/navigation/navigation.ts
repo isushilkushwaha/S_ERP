@@ -1,88 +1,71 @@
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  CalendarCheck,
-  FileText,
-  MessageSquare,
+  Bell,
+  BookOpen,
+  GraduationCap,
+  Home,
   Settings,
-  UserCog,
-  
+  Users,
+  Wallet,
 } from "lucide-react";
 
 import { PERMISSIONS } from "@/lib/rbac/permissions";
+import type { NavigationItem } from "./navigation-types";
 
-export const sidebarItems = [
+export const navigation: readonly NavigationItem[] = [
   {
     id: "dashboard",
     title: "Dashboard",
     href: "/dashboard",
-    icon: LayoutDashboard,
+    icon: Home,
     permission: PERMISSIONS.DASHBOARD_VIEW,
   },
   {
     id: "students",
     title: "Students",
-    href: "/students",
-    icon: Users,
+    href: "/dashboard/students",
+    icon: GraduationCap,
     permission: PERMISSIONS.STUDENTS_VIEW,
   },
   {
     id: "fees",
     title: "Fees",
-    href: "/fees",
-    icon: CreditCard,
+    href: "/dashboard/fees",
+    icon: Wallet,
     permission: PERMISSIONS.FEES_VIEW,
   },
   {
     id: "attendance",
     title: "Attendance",
-    href: "/attendance",
-    icon: CalendarCheck,
+    href: "/dashboard/attendance",
+    icon: Users,
     permission: PERMISSIONS.ATTENDANCE_VIEW,
   },
   {
     id: "examination",
     title: "Examination",
-    href: "/examination",
-    icon: FileText,
+    href: "/dashboard/examination",
+    icon: BookOpen,
     permission: PERMISSIONS.EXAMINATION_VIEW,
   },
   {
     id: "sms",
     title: "SMS",
-    href: "/sms",
-    icon: MessageSquare,
-    permission: PERMISSIONS.SMS_SEND,
+    href: "/dashboard/sms",
+    icon: Bell,
+    permission: PERMISSIONS.SMS_VIEW,
   },
   {
     id: "settings",
     title: "Settings",
     href: "/settings",
     icon: Settings,
-    permission: PERMISSIONS.SETTINGS_MANAGE,
+    permission: PERMISSIONS.SETTINGS_VIEW,
   },
   {
     id: "users",
     title: "Users",
     href: "/users",
-    icon: UserCog,
+    icon: Users,
     permission: PERMISSIONS.USERS_VIEW,
   },
-
-  // Hide these until you create permissions for them
-  // {
-  //   id: "roles",
-  //   title: "Roles",
-  //   href: "/roles",
-  //   icon: ShieldCheck,
-  //   permission: PERMISSIONS.ROLE_VIEW,
-  // },
-  // {
-  //   id: "profile",
-  //   title: "Profile",
-  //   href: "/profile",
-  //   icon: User,
-  //   permission: PERMISSIONS.PROFILE_VIEW,
-  // },
 ] as const;

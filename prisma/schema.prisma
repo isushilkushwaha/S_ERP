@@ -17,7 +17,6 @@ enum AdminType {
   SECONDARY
 }
 
-
 model Role {
   id              String           @id @default(cuid())
   name            RoleName         @unique
@@ -28,21 +27,21 @@ model Role {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String     @id @default(uuid())
   fullName     String
-  email        String    @unique
-  username     String    @unique
+  email        String     @unique
+  username     String     @unique
   passwordHash String
   roleId       String
   adminType    AdminType?
-  isActive     Boolean   @default(true)
+  isActive     Boolean    @default(true)
   lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
   accounts     Account[]
   sessions     Session[]
-  role         Role      @relation(fields: [roleId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@index([email])
   @@index([username])
@@ -102,4 +101,272 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+// ==============================
+// ENUMS
+// ==============================
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentCategory {
+  GENERAL
+  OBC
+  SC
+  ST
+  EWS
+  MINORITY
+  OTHER
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  ALUMNI
+  TRANSFERRED
+}
+
+enum AcademicYearStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum Medium {
+  ENGLISH
+  HINDI
+  BOTH
+}
+
+enum AdmissionType {
+  NEW
+  PROMOTION
+  TRANSFER
+  READMISSION
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PROMOTED
+  PASSED_OUT
+  TRANSFERRED
+  LEFT
+}
+
+enum Stream {
+  SCIENCE
+  COMMERCE
+  ARTS
+}
+
+enum DocumentType {
+  AADHAAR
+  PHOTO
+  BIRTH_CERTIFICATE
+  TRANSFER_CERTIFICATE
+  CASTE_CERTIFICATE
+  INCOME_CERTIFICATE
+  MARKSHEET
+  OTHER
+}
+
+model AcademicYear {
+  id          String             @id @default(uuid())
+  name        String             @unique
+  code        String?            @unique
+  startDate   DateTime
+  endDate     DateTime
+  isCurrent   Boolean            @default(false)
+  status      AcademicYearStatus @default(ACTIVE)
+  description String?
+
+  enrollments StudentEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Class {
+  id           String  @id @default(uuid())
+  name         String
+  numericOrder Int
+  medium       Medium  @default(ENGLISH)
+  description  String?
+
+  sections    Section[]
+  enrollments StudentEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+  @@index([numericOrder])
+}
+
+model Section {
+  id String @id @default(uuid())
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  name String
+
+  classTeacherId String?
+  roomNumber     String?
+  capacity       Int?
+
+  isActive Boolean @default(true)
+
+  enrollments StudentEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([classId, name])
+}
+
+model Student {
+  id String @id @default(uuid())
+
+  studentCode     String @unique
+  admissionNumber String @unique
+
+  emisNumber String?
+  apaarId    String?
+  penNumber  String?
+
+  firstName  String
+  middleName String?
+  lastName   String
+
+  gender      Gender
+  dateOfBirth DateTime
+
+  bloodGroup  String?
+  religion    String?
+  category    StudentCategory?
+  caste       String?
+  nationality String?
+
+  aadhaarNumber      String? @unique
+  birthCertificateNo String?
+
+  email  String?
+  mobile String?
+
+  photo String?
+
+  admissionDate  DateTime
+  previousSchool String?
+
+  status StudentStatus @default(ACTIVE)
+
+  remarks String?
+
+  fatherName       String
+  fatherOccupation String?
+  fatherMobile     String
+  fatherEmail      String?
+
+  motherName       String?
+  motherOccupation String?
+  motherMobile     String?
+  motherEmail      String?
+
+  guardianName     String?
+  guardianRelation String?
+  guardianMobile   String?
+  guardianEmail    String?
+
+  addressLine1 String
+  addressLine2 String?
+
+  city       String
+  district   String
+  state      String
+  country    String @default("India")
+  postalCode String
+
+  isTransportRequired Boolean @default(false)
+  isHostelRequired    Boolean @default(false)
+
+  enrollments StudentEnrollment[]
+  documents   StudentDocument[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([studentCode])
+  @@index([admissionNumber])
+  @@index([aadhaarNumber])
+}
+
+model StudentEnrollment {
+  id String @id @default(uuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id])
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id])
+
+  rollNumber Int
+
+  medium Medium
+  stream Stream?
+
+  house                   String?
+  boardRegistrationNumber String?
+
+  admissionType AdmissionType
+
+  enrollmentStatus EnrollmentStatus @default(ACTIVE)
+
+  joinedDate DateTime
+  leftDate   DateTime?
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, academicYearId])
+  @@unique([academicYearId, classId, sectionId, rollNumber])
+  @@index([academicYearId, classId, sectionId])
+}
+
+model StudentDocument {
+  id String @id @default(uuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  documentType DocumentType
+
+  documentNumber String?
+
+  fileName String
+  fileUrl  String
+
+  mimeType String?
+  fileSize Int?
+
+  issueDate  DateTime?
+  expiryDate DateTime?
+
+  verified Boolean @default(false)
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+}

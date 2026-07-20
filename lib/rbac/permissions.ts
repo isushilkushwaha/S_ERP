@@ -12,6 +12,11 @@ export const PERMISSIONS = {
   STUDENTS_CREATE: "students.create",
   STUDENTS_UPDATE: "students.update",
   STUDENTS_DELETE: "students.delete",
+  // Student Enrollments
+  STUDENT_ENROLLMENTS_VIEW: "student-enrollments.view",
+  STUDENT_ENROLLMENTS_CREATE: "student-enrollments.create",
+  STUDENT_ENROLLMENTS_UPDATE: "student-enrollments.update",
+  STUDENT_ENROLLMENTS_DELETE: "student-enrollments.delete",
 
   // Fees
   FEES_VIEW: "fees.view",

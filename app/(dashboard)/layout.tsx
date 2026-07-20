@@ -1,9 +1,9 @@
-
-
 import type { Metadata } from "next";
 
 import { auth } from "@/auth";
+
 import { DashboardLayout } from "@/components/dashboard/layout/dashboard-layout";
+import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "School Management System | Dashboard",
@@ -21,7 +21,9 @@ export default async function Layout({
 
   return (
     <DashboardLayout session={session}>
-      {children}
+      <Providers>
+        {children}
+      </Providers>
     </DashboardLayout>
   );
 }

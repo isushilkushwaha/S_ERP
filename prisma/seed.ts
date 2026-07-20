@@ -4,6 +4,9 @@ import {
   PrismaClient,
   RoleName,
   AdminType,
+  AcademicYearStatus,
+  Medium,
+  
 } from "@prisma/client";
 import bcrypt from "bcrypt";
 
@@ -134,7 +137,122 @@ async function main() {
     },
   });
 
+
   console.log("✅ Demo Teacher ready");
+
+
+  // ------------------------------------------------------------------
+// Academic Years
+// ------------------------------------------------------------------
+
+const academicYears = [
+  {
+    name: "2025-26",
+    code: "2025-26",
+    startDate: new Date("2025-04-01"),
+    endDate: new Date("2026-03-31"),
+    isCurrent: false,
+  },
+  {
+    name: "2026-27",
+    code: "2026-27",
+    startDate: new Date("2026-04-01"),
+    endDate: new Date("2027-03-31"),
+    isCurrent: true,
+  },
+  {
+    name: "2027-28",
+    code: "2027-28",
+    startDate: new Date("2027-04-01"),
+    endDate: new Date("2028-03-31"),
+    isCurrent: false,
+  },
+];
+
+for (const year of academicYears) {
+  await prisma.academicYear.upsert({
+    where: {
+      name: year.name,
+    },
+    update: year,
+    create: {
+      ...year,
+      status: AcademicYearStatus.ACTIVE,
+    },
+  });
+}
+
+console.log("✅ Academic Years seeded");
+
+// ------------------------------------------------------------------
+// Classes
+// ------------------------------------------------------------------
+
+const classes = [
+  "Nursery",
+  "LKG",
+  "UKG",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+];
+
+for (const [index, className] of classes.entries()) {
+  await prisma.class.upsert({
+    where: {
+      name: className,
+    },
+    update: {},
+
+    create: {
+      name: className,
+      numericOrder: index + 1,
+      medium: Medium.ENGLISH,
+    },
+  });
+}
+
+console.log("✅ Classes seeded");
+
+// ------------------------------------------------------------------
+// Sections
+// ------------------------------------------------------------------
+
+const allClasses = await prisma.class.findMany();
+
+for (const schoolClass of allClasses) {
+  for (const sectionName of ["A", "B"]) {
+    await prisma.section.upsert({
+      where: {
+        classId_name: {
+          classId: schoolClass.id,
+          name: sectionName,
+        },
+      },
+
+      update: {},
+
+      create: {
+        classId: schoolClass.id,
+        name: sectionName,
+        capacity: 40,
+      },
+    });
+  }
+}
+
+console.log("✅ Sections seeded");
+
+
 
   console.log("🎉 Database seeding completed successfully.");
 }

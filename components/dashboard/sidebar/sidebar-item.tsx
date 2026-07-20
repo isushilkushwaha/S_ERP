@@ -20,7 +20,7 @@ export function SidebarItem({
   const { collapsed , closeMobile} = useSidebar();
 
   const active =
-    pathname.startsWith(item.href);
+    pathname?.startsWith(item.href) ?? false;
 
   const Icon = item.icon;
 

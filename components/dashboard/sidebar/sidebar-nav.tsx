@@ -4,6 +4,7 @@ import { hasPermission } from "@/lib/rbac";
 
 import { navigation } from "../navigation/navigation";
 import { SidebarItem } from "./sidebar-item";
+import { SidebarGroup } from "./sidebar-group";
 
 interface SidebarNavProps {
   session: Session | null;
@@ -24,12 +25,19 @@ export function SidebarNav({
 
   return (
     <nav className="flex-1 space-y-1 p-4">
-      {visibleItems.map((item) => (
-        <SidebarItem
-          key={item.id}
-          item={item}
-        />
-      ))}
-    </nav>
+  {visibleItems.map((item) =>
+    item.children?.length ? (
+      <SidebarGroup
+        key={item.id}
+        item={item}
+      />
+    ) : (
+      <SidebarItem
+        key={item.id}
+        item={item}
+      />
+    )
+  )}
+</nav>
   );
 }

@@ -16,7 +16,7 @@ export function findNavigationItem(
   items: readonly NavigationItem[]
 ) {
   return flattenNavigation(items).find(
-    (item) => pathname.startsWith(item.href)
+    (item) => item.href !== undefined && pathname.startsWith(item.href)
   );
 }
 

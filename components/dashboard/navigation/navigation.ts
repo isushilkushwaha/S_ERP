@@ -19,17 +19,61 @@ export const navigation: readonly NavigationItem[] = [
     icon: Home,
     permission: PERMISSIONS.DASHBOARD_VIEW,
   },
+  // {
+  //   id: "students",
+  //   title: "Students",
+  //   href: "/students",
+  //   icon: GraduationCap,
+  //   permission: PERMISSIONS.STUDENTS_VIEW,
+  // },
+
   {
-    id: "students",
-    title: "Students",
-    href: "/dashboard/students",
+  id: "students",
+  title: "Students",
+  href: "/students",
+  icon: GraduationCap,
+  permission: PERMISSIONS.STUDENTS_VIEW,
+  children: [
+    {
+      id: "student-registration",
+      title: "Registration",
+      href: "/students/registration",
+      icon: GraduationCap,
+      permission: PERMISSIONS.STUDENTS_CREATE,
+    },
+    {
+      id: "student-list",
+      title: "All Students",
+      href: "/students",
+      icon: GraduationCap,
+      permission: PERMISSIONS.STUDENTS_VIEW,
+    },
+    {
+      id: "student-enrollments",
+      title: "Academic Enrollment",
+      href: "/students/enrollments",
+      icon: GraduationCap,
+      permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
+    },
+  ],
+}
+,
+
+   
+  {
+    id: "student-enrollments",
+    title: "Student Enrollments",
+    href: "/student-enrollments",
     icon: GraduationCap,
-    permission: PERMISSIONS.STUDENTS_VIEW,
+    permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
   },
+
+
+
   {
     id: "fees",
     title: "Fees",
-    href: "/dashboard/fees",
+    href: "/fees",
     icon: Wallet,
     permission: PERMISSIONS.FEES_VIEW,
   },

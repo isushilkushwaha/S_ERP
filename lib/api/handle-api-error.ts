@@ -11,7 +11,7 @@ export function handleApiError(error: unknown) {
       {
         success: false,
         message: "Validation failed",
-        errors: error.flatten(),
+        errors: error.flatten().fieldErrors,
       },
       {
         status: 400,
@@ -20,16 +20,17 @@ export function handleApiError(error: unknown) {
   }
 
   if (error instanceof AppError) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: error.message,
-      },
-      {
-        status: error.statusCode,
-      }
-    );
-  }
+  return NextResponse.json(
+    {
+      success: false,
+      message: error.message,
+      code: error.name,
+    },
+    {
+      status: error.statusCode,
+    }
+  );
+}
 
   return NextResponse.json(
     {
@@ -40,4 +41,6 @@ export function handleApiError(error: unknown) {
       status: 500,
     }
   );
+
+  
 }

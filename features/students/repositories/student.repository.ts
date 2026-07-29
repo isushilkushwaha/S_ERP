@@ -1,51 +1,116 @@
-import { Prisma, StudentStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
 export class StudentRepository {
+  private buildWhere(search?: string): Prisma.StudentWhereInput {
+    const where: Prisma.StudentWhereInput = {
+      deletedAt: null,
+    };
+
+    if (!search?.trim()) {
+      return where;
+    }
+
+    const terms = search
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    const nameFilter: Prisma.StudentWhereInput = {
+      AND: terms.map((term) => ({
+        OR: [
+          {
+            firstName: {
+              contains: term,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+          {
+            middleName: {
+              contains: term,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+          {
+            lastName: {
+              contains: term,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+        ],
+      })),
+    };
+
+    where.OR = [
+      nameFilter,
+
+      {
+        fatherName: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        motherName: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        studentCode: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        aadhaarNumber: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        mobile: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        fatherMobile: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+
+      {
+        motherMobile: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      },
+    ];
+
+    return where;
+  }
+
   async findMany(params: {
     search?: string;
-    status?: StudentStatus;
     skip?: number;
     take?: number;
   }) {
-    const { search, status, skip = 0, take = 10 } = params;
+    const {
+      search,
+      skip = 0,
+      take = 10,
+    } = params;
 
     return prisma.student.findMany({
-      where: {
-        deletedAt: null,
-
-        ...(status && { status }),
-
-        ...(search && {
-          OR: [
-            {
-              firstName: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              lastName: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              admissionNumber: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              studentCode: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-          ],
-        }),
-      },
+      where: this.buildWhere(search),
 
       skip,
       take,
@@ -58,45 +123,9 @@ export class StudentRepository {
 
   async count(params: {
     search?: string;
-    status?: StudentStatus;
   }) {
-    const { search, status } = params;
-
     return prisma.student.count({
-      where: {
-        deletedAt: null,
-
-        ...(status && { status }),
-
-        ...(search && {
-          OR: [
-            {
-              firstName: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              lastName: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              admissionNumber: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-            {
-              studentCode: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-          ],
-        }),
-      },
+      where: this.buildWhere(params.search),
     });
   }
 
@@ -113,14 +142,6 @@ export class StudentRepository {
     return prisma.student.findUnique({
       where: {
         studentCode,
-      },
-    });
-  }
-
-  async findByAdmissionNumber(admissionNumber: string) {
-    return prisma.student.findUnique({
-      where: {
-        admissionNumber,
       },
     });
   }
@@ -143,17 +164,24 @@ export class StudentRepository {
     });
   }
 
-  async softDelete(id: string) {
-    return prisma.student.update({
-      where: {
-        id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-  }
+  // async softDelete(id: string) {
+  //   return prisma.student.update({
+  //     where: {
+  //       id,
+  //     },
+  //     data: {
+  //       deletedAt: new Date(),
+  //     },
+  //   });
+  // }
+
+  async delete(id: string) {
+  return prisma.student.delete({
+    where: {
+      id,
+    },
+  });
+}
 }
 
-export const studentRepository =
-  new StudentRepository();
+export const studentRepository = new StudentRepository();

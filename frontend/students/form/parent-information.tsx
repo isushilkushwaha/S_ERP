@@ -75,6 +75,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="Occupation"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -114,6 +115,7 @@ export function ParentInformation() {
                       type="email"
                       placeholder="father@example.com"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -142,6 +144,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="Mother Name"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -163,6 +166,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="Occupation"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -182,6 +186,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="9876543210"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -202,6 +207,7 @@ export function ParentInformation() {
                       type="email"
                       placeholder="mother@example.com"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -232,6 +238,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="Guardian Name"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -253,6 +260,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="Uncle, Aunt..."
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -272,6 +280,7 @@ export function ParentInformation() {
                     <Input
                       placeholder="9876543210"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 
@@ -292,6 +301,7 @@ export function ParentInformation() {
                       type="email"
                       placeholder="guardian@example.com"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
 

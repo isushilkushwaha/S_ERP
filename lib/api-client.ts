@@ -1,9 +1,10 @@
-// src/lib/api-client.ts
+
 
 export class ApiError extends Error {
   constructor(
     message: string,
-    public readonly status: number
+    public readonly status: number,
+    public readonly errors?: Record<string, string[]>
   ) {
     super(message);
     this.name = "ApiError";
@@ -31,10 +32,16 @@ async function request<T>(
   const json = await response.json();
 
   if (!response.ok) {
+    // throw new ApiError(
+    //   json?.message ?? "Something went wrong.",
+    //   response.status
+    // );
+
     throw new ApiError(
-      json?.message ?? "Something went wrong.",
-      response.status
-    );
+  json?.message ?? "Something went wrong.",
+  response.status,
+  json?.errors
+);
   }
 
   return json as T;

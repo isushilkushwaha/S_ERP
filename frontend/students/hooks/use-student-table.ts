@@ -23,15 +23,10 @@ export function useStudentTable({
     setPage,
     setLimit,
 
-    setClass,
-    setSection,
-    setStatus,
-
     resetFilters,
   } = useStudentFilters();
 
   const studentsQuery = useStudents(filters);
-  console.log("studentsQuery.data =", studentsQuery.data);
 
   const tableState = useDataTable({
     data: studentsQuery.data?.data ?? [],
@@ -39,13 +34,14 @@ export function useStudentTable({
     columns,
 
     pageCount:
-      studentsQuery.data?.meta.totalPages ?? 0,
+      studentsQuery.data?.meta?.totalPages ??
+      0,
 
     manualPagination: true,
 
-    initialPageIndex: filters.page - 1,
+    initialPageIndex: (filters.page ?? 1) - 1,
 
-    initialPageSize: filters.limit,
+    initialPageSize: filters.limit ?? 10,
 
     onPaginationChange: (pagination) => {
       setPage(pagination.pageIndex + 1);
@@ -61,10 +57,6 @@ export function useStudentTable({
     studentsQuery,
 
     setSearch,
-
-    setClass,
-    setSection,
-    setStatus,
 
     setPage,
     setLimit,

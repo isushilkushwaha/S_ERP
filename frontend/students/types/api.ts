@@ -1,6 +1,9 @@
 // frontend/students/types/api.ts
 
-import type { Student, StudentListItem } from "./student";
+import type {
+  Student,
+  StudentListItem,
+} from "./student";
 
 export interface PaginationMeta {
   page: number;

@@ -14,21 +14,5 @@ export function buildStudentSearchParams(
     params.set("search", filters.search.trim());
   }
 
-  if (filters.academicYearId) {
-    params.set("academicYearId", filters.academicYearId);
-  }
-
-  if (filters.classId) {
-    params.set("classId", filters.classId);
-  }
-
-  if (filters.sectionId) {
-    params.set("sectionId", filters.sectionId);
-  }
-
-  if (filters.status) {
-    params.set("status", filters.status);
-  }
-
   return params.toString();
 }

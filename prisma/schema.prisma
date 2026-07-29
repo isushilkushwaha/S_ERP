@@ -231,8 +231,7 @@ model Section {
 model Student {
   id String @id @default(uuid())
 
-  studentCode     String @unique
-  admissionNumber String @unique
+  studentCode String @unique
 
   emisNumber String?
   apaarId    String?
@@ -259,10 +258,8 @@ model Student {
 
   photo String?
 
-  admissionDate  DateTime
-  previousSchool String?
-
-  status StudentStatus @default(ACTIVE)
+  registrationDate DateTime @default(now())
+  previousSchool   String?
 
   remarks String?
 
@@ -290,9 +287,6 @@ model Student {
   country    String @default("India")
   postalCode String
 
-  isTransportRequired Boolean @default(false)
-  isHostelRequired    Boolean @default(false)
-
   enrollments StudentEnrollment[]
   documents   StudentDocument[]
 
@@ -301,39 +295,47 @@ model Student {
   deletedAt DateTime?
 
   @@index([studentCode])
-  @@index([admissionNumber])
   @@index([aadhaarNumber])
 }
 
 model StudentEnrollment {
   id String @id @default(uuid())
 
+  // Student
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
+  // Academic Session
   academicYearId String
   academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
 
+  // Class Assignment
   classId String
   class   Class  @relation(fields: [classId], references: [id])
 
   sectionId String
   section   Section @relation(fields: [sectionId], references: [id])
 
+  // Admission
+  admissionNumber String
+  admissionDate   DateTime
+  admissionType   AdmissionType
+
+  // Academic
   rollNumber Int
+  medium     Medium
+  stream     Stream?
 
-  medium Medium
-  stream Stream?
-
+  // Optional
   house                   String?
   boardRegistrationNumber String?
 
-  admissionType AdmissionType
+  // Facilities
+  isTransportRequired Boolean @default(false)
+  isHostelRequired    Boolean @default(false)
 
-  enrollmentStatus EnrollmentStatus @default(ACTIVE)
-
-  joinedDate DateTime
-  leftDate   DateTime?
+  // Current Student Status
+  status StudentStatus @default(ACTIVE)
 
   remarks String?
 
@@ -341,8 +343,13 @@ model StudentEnrollment {
   updatedAt DateTime @updatedAt
 
   @@unique([studentId, academicYearId])
+  @@unique([academicYearId, admissionNumber])
   @@unique([academicYearId, classId, sectionId, rollNumber])
-  @@index([academicYearId, classId, sectionId])
+  @@index([studentId])
+  @@index([academicYearId])
+  @@index([classId])
+  @@index([sectionId])
+  @@index([status])
 }
 
 model StudentDocument {
@@ -369,4 +376,54 @@ model StudentDocument {
   remarks String?
 
   createdAt DateTime @default(now())
+}
+
+// -------------------------------------------------------SchoolProfile-----------------------------------------------------------
+
+model SchoolProfile {
+  id String @id @default(uuid()) @db.Uuid
+
+  // Basic Information
+  schoolName String  @db.VarChar(150)
+  schoolCode String? @unique @db.VarChar(30)
+
+  // Branding
+  logoUrl String? @db.Text
+  faviconUrl   String?
+
+  // Contact Information
+  email          String? @db.VarChar(150)
+  phone          String? @db.VarChar(20)
+  alternatePhone String? @db.VarChar(20)
+  website        String? @db.VarChar(255)
+
+  // Address
+  addressLine1 String  @db.VarChar(255)
+  addressLine2 String? @db.VarChar(255)
+  city         String  @db.VarChar(100)
+  district     String? @db.VarChar(100)
+  state        String  @db.VarChar(100)
+  country      String  @default("India") @db.VarChar(100)
+  postalCode   String? @db.VarChar(10)
+
+  // Academic Information
+  board             String? @db.VarChar(100)
+  affiliationNumber String? @db.VarChar(100)
+  principalName     String? @db.VarChar(150)
+
+  // Localization
+  timezone String @default("Asia/Kolkata")
+  currency String @default("INR")
+
+  // Status
+  isActive Boolean @default(true)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Soft Delete
+  deletedAt DateTime?
+
+  @@map("school_profiles")
 }

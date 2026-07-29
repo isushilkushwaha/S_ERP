@@ -6,10 +6,23 @@ export function mapStudentsForExport(
   students: StudentListItem[]
 ) {
   return students.map((student) => ({
-    AdmissionNo: student.admissionNumber,
+    StudentCode: student.studentCode,
     Name: `${student.firstName} ${student.lastName}`,
-    Class: student.currentEnrollment?.className ?? "",
-    Section: student.currentEnrollment?.sectionName ?? "",
-    Status: student.status,
+    Gender: student.gender,
+    Mobile: student.mobile ?? "",
+
+    AcademicYear:
+      student.currentEnrollment?.academicYear ?? "",
+
+    Class:
+      student.currentEnrollment?.className ?? "",
+
+    Section:
+      student.currentEnrollment?.sectionName ?? "",
+
+    RollNumber:
+      student.currentEnrollment?.rollNumber ?? "",
+
+    RegistrationDate: student.registrationDate,
   }));
 }

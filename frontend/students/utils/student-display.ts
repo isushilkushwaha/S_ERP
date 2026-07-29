@@ -2,6 +2,9 @@
 
 import type { Student } from "../types";
 
+/**
+ * Returns the student's full name.
+ */
 export function getStudentFullName(student: Student): string {
   return [
     student.firstName,
@@ -12,26 +15,10 @@ export function getStudentFullName(student: Student): string {
     .join(" ");
 }
 
+/**
+ * Returns the student's initials.
+ */
 export function getStudentInitials(student: Student): string {
   return `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`
     .toUpperCase();
-}
-
-export function getStudentStatusColor(status: Student["status"]) {
-  switch (status) {
-    case "ACTIVE":
-      return "success";
-
-    case "INACTIVE":
-      return "secondary";
-
-    case "TRANSFERRED":
-      return "warning";
-
-    case "ALUMNI":
-      return "outline";
-
-    default:
-      return "secondary";
-  }
 }

@@ -3,14 +3,14 @@
 import { AlertCircle } from "lucide-react";
 
 import { useStudent } from "../hooks";
-import { StudentHeader } from "../components/student-header";
 
-import { AdmissionCard } from "../components/admission-card";
- import { PersonalCard } from "../components/personal-card";
- import { ParentCard } from "../components/parent-card";
- import { AddressCard } from "../components/address-card";
- //import { EnrollmentCard } from "../components/enrollment-card";
- //import { DocumentsCard } from "../components/documents-card";
+import { StudentHeader } from "../components/student-header";
+import { RegistrationCard } from "../components/admission-card";
+import { PersonalCard } from "../components/personal-card";
+import { ParentCard } from "../components/parent-card";
+import { AddressCard } from "../components/address-card";
+
+
 
 interface ViewStudentPageProps {
   studentId: string;
@@ -19,10 +19,11 @@ interface ViewStudentPageProps {
 export function ViewStudentPage({
   studentId,
 }: ViewStudentPageProps) {
-  const query = useStudent(studentId);
-
-  
-  const { data, isPending, error } = query;
+  const {
+    data,
+    isPending,
+    error,
+  } = useStudent(studentId);
 
   if (isPending) {
     return (
@@ -55,23 +56,19 @@ export function ViewStudentPage({
       {/* Header */}
       <StudentHeader student={student} />
 
-      {/* Admission */}
-      <AdmissionCard student={student} />
+      {/* Registration */}
+      <RegistrationCard student={student} />
 
-      {/* Personal */}
+      {/* Personal Information */}
       <PersonalCard student={student} />
 
-      {/* Parent */}
+      {/* Parent Information */}
       <ParentCard student={student} />
 
-      {/* Address */}
+      {/* Address Information */}
       <AddressCard student={student} />
 
-      {/* Enrollment */}
-      {/* <EnrollmentCard studentId={student.id} /> */}
-
-      {/* Documents */}
-      {/* <DocumentsCard studentId={student.id} /> */}
+      
     </div>
   );
 }

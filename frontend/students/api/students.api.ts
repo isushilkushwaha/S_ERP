@@ -7,10 +7,9 @@ import type {
   DeleteResponse,
   GetStudentResponse,
   GetStudentsResponse,
+  StudentFilters,
   UpdateStudentRequest,
 } from "../types";
-
-import type { StudentFilters } from "../types";
 
 const BASE_URL = "/api/students";
 
@@ -20,19 +19,9 @@ function buildSearchParams(filters: StudentFilters) {
   params.set("page", String(filters.page));
   params.set("limit", String(filters.limit));
 
-  if (filters.search) params.set("search", filters.search);
-
-  if (filters.academicYearId)
-    params.set("academicYearId", filters.academicYearId);
-
-  if (filters.classId)
-    params.set("classId", filters.classId);
-
-  if (filters.sectionId)
-    params.set("sectionId", filters.sectionId);
-
-  if (filters.status)
-    params.set("status", filters.status);
+  if (filters.search?.trim()) {
+    params.set("search", filters.search.trim());
+  }
 
   return params.toString();
 }
@@ -44,11 +33,21 @@ export const studentsApi = {
     );
   },
 
-  getStudent(studentId: string) {
+  getStudent(id: string) {
     return apiClient.get<GetStudentResponse>(
-      `${BASE_URL}/${studentId}`
+      `${BASE_URL}/${id}`
     );
   },
+
+  async searchStudentByCode(studentCode: string) {
+  const response = await this.getStudents({
+    page: 1,
+    limit: 1,
+    search: studentCode,
+  });
+
+  return response.data[0] ?? null;
+},
 
   createStudent(payload: CreateStudentRequest) {
     return apiClient.post<GetStudentResponse>(
@@ -58,18 +57,41 @@ export const studentsApi = {
   },
 
   updateStudent(
-    studentId: string,
+    id: string,
     payload: UpdateStudentRequest
   ) {
     return apiClient.patch<GetStudentResponse>(
-      `${BASE_URL}/${studentId}`,
+      `${BASE_URL}/${id}`,
       payload
     );
   },
 
-  deleteStudent(studentId: string) {
+  deleteStudent(id: string) {
     return apiClient.delete<DeleteResponse>(
-      `${BASE_URL}/${studentId}`
+      `${BASE_URL}/${id}`
     );
   },
+
+  async uploadPhoto(id: string, file: File) {
+  const formData = new FormData();
+
+  formData.append("photo", file);
+
+  const response = await fetch(
+    `/api/students/${id}/photo`,
+    {
+      method: "PATCH",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+
+    throw new Error(error.message ?? "Upload failed.");
+  }
+
+  return response.json();
+}
+
 };

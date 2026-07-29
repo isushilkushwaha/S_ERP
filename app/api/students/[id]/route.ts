@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { updateStudentSchema } from "@/features/students/schemas/update-student.schema";
+import { updateStudentSchema } from "@/features/students/schemas/update/update-student.schema";
+import { removeStudentSchema } from "@/features/students/schemas/remove-student.schema";
 import { studentService } from "@/features/students/services/student.service";
 
 interface RouteContext {
@@ -80,17 +81,17 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteContext
+  request: NextRequest
 ) {
   try {
-    const { id } = await params;
+    const body = await request.json();
 
-    await studentService.deleteStudent(id);
+    const data = removeStudentSchema.parse(body);
 
-    return NextResponse.json({
-      message: "Student deleted successfully.",
-    });
+    const response =
+      await studentService.removeStudent(data);
+
+    return NextResponse.json(response);
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json(
@@ -98,7 +99,7 @@ export async function DELETE(
           message: error.message,
         },
         {
-          status: 404,
+          status: 400,
         }
       );
     }

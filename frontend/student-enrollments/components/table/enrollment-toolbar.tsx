@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, RotateCcw, Search } from "lucide-react";
+import { RotateCcw, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +24,6 @@ interface EnrollmentToolbarProps {
   onStatusChange: (value: EnrollmentStatus | undefined) => void;
 
   onResetFilters: () => void;
-
-  onCreate: () => void;
 }
 
 export function EnrollmentToolbar({
@@ -45,11 +43,10 @@ export function EnrollmentToolbar({
   onStatusChange,
 
   onResetFilters,
-
-  onCreate,
 }: EnrollmentToolbarProps) {
   return (
     <div className="space-y-4">
+      {/* Search */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:max-w-sm">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -61,13 +58,9 @@ export function EnrollmentToolbar({
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
-
-        <Button onClick={onCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Enrollment
-        </Button>
       </div>
 
+      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         {/* Academic Year Select */}
 

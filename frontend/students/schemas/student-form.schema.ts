@@ -1,171 +1,284 @@
-
 import { z } from "zod";
 
 import {
   BLOOD_GROUP_OPTIONS,
   CATEGORY_OPTIONS,
   GENDER_OPTIONS,
-  STUDENT_STATUS_VALUES,
 } from "../constants";
 
 export const studentFormSchema = z.object({
-  // Admission
-  studentCode: z.string().trim().min(1).max(30),
+  // Government IDs
+  emisNumber: z
+    .string()
+    .trim()
+    .max(50)
+    .optional()
+    .nullable(),
 
-  admissionNumber: z.string().trim().min(1).max(30),
+  apaarId: z
+    .string()
+    .trim()
+    .max(50)
+    .optional()
+    .nullable(),
 
-  admissionDate: z.string().min(1),
+  penNumber: z
+    .string()
+    .trim()
+    .max(50)
+    .optional()
+    .nullable(),
 
-  status: z.enum(STUDENT_STATUS_VALUES),
+  // Personal Information
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name is required")
+    .max(100),
 
-  // Personal
-  firstName: z.string().trim().min(2).max(100),
+  middleName: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .nullable(),
 
-  middleName: z.string().trim().max(100).optional().or(z.literal("")),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "Last name is required")
+    .max(100),
 
-  lastName: z.string().trim().min(1).max(100),
-
-  // gender: z.enum(GENDER_OPTIONS),
   gender: z
-  .string()
-  .min(1, "Gender is required")
-  .refine(
-    (value) => GENDER_OPTIONS.includes(value as (typeof GENDER_OPTIONS)[number]),
-    "Invalid gender"
-  ),
+    .string()
+    .min(1, "Gender is required")
+    .refine(
+      (value) =>
+        GENDER_OPTIONS.includes(
+          value as (typeof GENDER_OPTIONS)[number]
+        ),
+      "Invalid gender"
+    ),
 
-  dateOfBirth: z.string().min(1),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
 
-  bloodGroup: z.enum(BLOOD_GROUP_OPTIONS).optional().or(z.literal("")),
+  bloodGroup: z
+  .enum(BLOOD_GROUP_OPTIONS)
+  .optional()
+  .nullable()
+  .or(z.literal("")),
 
-  religion: z.string().trim().max(100).optional().or(z.literal("")),
+  religion: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .nullable(),
 
-  category: z.enum(CATEGORY_OPTIONS).optional().or(z.literal("")),
+  category: z
+  .enum(CATEGORY_OPTIONS)
+  .optional()
+  .nullable()
+  .or(z.literal("")),
 
-  caste: z.string().trim().max(100).optional().or(z.literal("")),
+  caste: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .nullable(),
 
-  nationality: z.string().trim().max(100),
+  nationality: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .default("India"),
 
   aadhaarNumber: z
     .string()
-    .regex(/^\d{12}$/)
+    .regex(
+      /^\d{12}$/,
+      "Aadhaar must contain exactly 12 digits"
+    )
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   birthCertificateNo: z
     .string()
     .trim()
     .max(100)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  email: z.email().optional().or(z.literal("")),
+  email: z
+    .string()
+    .email("Invalid email")
+    .optional()
+    .nullable(),
 
   mobile: z
     .string()
-    .regex(/^[6-9]\d{9}$/)
+    .regex(
+      /^[6-9]\d{9}$/,
+      "Invalid mobile number"
+    )
     .optional()
-    .or(z.literal("")),
+    .nullable(),
+
+  photo: z
+    .string()
+    .optional()
+    .nullable(),
 
   previousSchool: z
     .string()
     .trim()
-    .max(200)
+    .max(255)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   remarks: z
     .string()
     .trim()
-    .max(500)
+    .max(1000)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  // Parent
-  fatherName: z.string().trim().min(2).max(150),
+  // Father
+  fatherName: z
+    .string()
+    .trim()
+    .min(2, "Father name is required")
+    .max(150),
 
   fatherOccupation: z
     .string()
     .trim()
-    .max(100)
+    .max(150)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   fatherMobile: z
     .string()
-    .regex(/^[6-9]\d{9}$/)
+    .regex(
+      /^[6-9]\d{9}$/,
+      "Invalid father mobile number"
+    ),
+
+  fatherEmail: z
+    .string()
+    .email("Invalid father email")
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  fatherEmail: z.email().optional().or(z.literal("")),
-
-  motherName: z.string().trim().min(2).max(150),
+  // Mother
+  motherName: z
+    .string()
+    .trim()
+    .max(150)
+    .optional()
+    .nullable(),
 
   motherOccupation: z
     .string()
     .trim()
-    .max(100)
+    .max(150)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   motherMobile: z
     .string()
-    .regex(/^[6-9]\d{9}$/)
+    .regex(
+      /^[6-9]\d{9}$/,
+      "Invalid mother mobile number"
+    )
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  motherEmail: z.email().optional().or(z.literal("")),
+  motherEmail: z
+    .string()
+    .email("Invalid mother email")
+    .optional()
+    .nullable(),
 
+  // Guardian
   guardianName: z
     .string()
     .trim()
     .max(150)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   guardianRelation: z
     .string()
     .trim()
     .max(100)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
   guardianMobile: z
     .string()
-    .regex(/^[6-9]\d{9}$/)
+    .regex(
+      /^[6-9]\d{9}$/,
+      "Invalid guardian mobile number"
+    )
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  guardianEmail: z.email().optional().or(z.literal("")),
+  guardianEmail: z
+    .string()
+    .email("Invalid guardian email")
+    .optional()
+    .nullable(),
 
   // Address
-  addressLine1: z.string().trim().min(5).max(200),
+  addressLine1: z
+    .string()
+    .trim()
+    .min(5, "Address is required")
+    .max(255),
 
   addressLine2: z
     .string()
     .trim()
-    .max(200)
+    .max(255)
     .optional()
-    .or(z.literal("")),
+    .nullable(),
 
-  city: z.string().trim().min(2).max(100),
+  city: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100),
 
-  district: z.string().trim().min(2).max(100),
+  district: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100),
 
-  state: z.string().trim().min(2).max(100),
+  state: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100),
 
-  country: z.string().trim().min(2).max(100),
+  country: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .default("India"),
 
-  postalCode: z.string().regex(/^\d{6}$/),
-
-  // Facilities
-  isTransportRequired: z.boolean(),
-
-  isHostelRequired: z.boolean(),
+  postalCode: z
+    .string()
+    .regex(
+      /^\d{6}$/,
+      "Postal code must be 6 digits"
+    ),
 });
 
-/**
- * IMPORTANT:
- * Use the INPUT type for React Hook Form / shadcn Form.
- */
-export type StudentFormValues = z.input<typeof studentFormSchema>;
+export type StudentFormValues = z.infer<
+  typeof studentFormSchema
+>;

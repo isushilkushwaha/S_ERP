@@ -24,7 +24,7 @@ export function FormActions({
       </Button>
 
       <Button
-        type="submit"
+        type="button"
         disabled={isSubmitting}
       >
         {isSubmitting && (

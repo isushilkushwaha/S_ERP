@@ -120,7 +120,7 @@ export function StudentEnrollmentList() {
           status={status}
           onStatusChange={setStatus}
           onResetFilters={handleResetFilters}
-          onCreate={handleCreate}
+          
         />
 
         {error ? (

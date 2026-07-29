@@ -9,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 
 import { Input } from "@/components/ui/input";
 
@@ -379,6 +380,112 @@ export function PersonalInformation({
             </FormItem>
           )}
         />
+
+        <FormField
+  control={form.control}
+  name="birthCertificateNo"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Birth Certificate No.</FormLabel>
+
+      <FormControl>
+        <Input
+          placeholder="Birth Certificate Number"
+          {...field}
+          value={field.value ?? ""}
+        />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="mobile"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Mobile Number</FormLabel>
+
+      <FormControl>
+        <Input
+          type="tel"
+          placeholder="9876543210"
+          maxLength={10}
+          {...field}
+          value={field.value ?? ""}
+        />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="email"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Email</FormLabel>
+
+      <FormControl>
+        <Input
+          type="email"
+          placeholder="student@example.com"
+          {...field}
+          value={field.value ?? ""}
+        />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="previousSchool"
+  render={({ field }) => (
+    <FormItem className="lg:col-span-2">
+      <FormLabel>Previous School</FormLabel>
+
+      <FormControl>
+        <Input
+          placeholder="Previous School Name"
+          {...field}
+          value={field.value ?? ""}
+        />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="remarks"
+  render={({ field }) => (
+    <FormItem className="lg:col-span-3">
+      <FormLabel>Remarks</FormLabel>
+
+      <FormControl>
+        <Textarea
+          rows={4}
+          placeholder="Additional remarks..."
+          {...field}
+          value={field.value ?? ""}
+        />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
       </div>
     </section>
   );

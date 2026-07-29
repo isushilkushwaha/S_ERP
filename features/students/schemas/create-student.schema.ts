@@ -1,19 +1,7 @@
-import { Gender, StudentCategory, StudentStatus } from "@prisma/client";
+import { Gender, StudentCategory } from "@prisma/client";
 import { z } from "zod";
 
 export const createStudentSchema = z.object({
-  studentCode: z
-    .string()
-    .trim()
-    .min(1, "Student code is required")
-    .max(50),
-
-  admissionNumber: z
-    .string()
-    .trim()
-    .min(1, "Admission number is required")
-    .max(50),
-
   emisNumber: z.string().trim().max(50).optional().nullable(),
 
   apaarId: z.string().trim().max(50).optional().nullable(),
@@ -80,8 +68,6 @@ export const createStudentSchema = z.object({
 
   photo: z.string().optional().nullable(),
 
-  admissionDate: z.coerce.date(),
-
   previousSchool: z
     .string()
     .trim()
@@ -89,9 +75,12 @@ export const createStudentSchema = z.object({
     .optional()
     .nullable(),
 
-  status: z.nativeEnum(StudentStatus).default(StudentStatus.ACTIVE),
-
-  remarks: z.string().trim().max(1000).optional().nullable(),
+  remarks: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .nullable(),
 
   fatherName: z
     .string()
@@ -119,7 +108,12 @@ export const createStudentSchema = z.object({
     .or(z.literal(""))
     .nullable(),
 
-  motherName: z.string().trim().max(150).optional().nullable(),
+  motherName: z
+    .string()
+    .trim()
+    .max(150)
+    .optional()
+    .nullable(),
 
   motherOccupation: z
     .string()
@@ -144,9 +138,19 @@ export const createStudentSchema = z.object({
     .or(z.literal(""))
     .nullable(),
 
-  guardianName: z.string().trim().max(150).optional().nullable(),
+  guardianName: z
+    .string()
+    .trim()
+    .max(150)
+    .optional()
+    .nullable(),
 
-  guardianRelation: z.string().trim().max(100).optional().nullable(),
+  guardianRelation: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .nullable(),
 
   guardianMobile: z
     .string()
@@ -170,7 +174,12 @@ export const createStudentSchema = z.object({
     .min(5, "Address is required")
     .max(255),
 
-  addressLine2: z.string().trim().max(255).optional().nullable(),
+  addressLine2: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .nullable(),
 
   city: z
     .string()
@@ -194,16 +203,13 @@ export const createStudentSchema = z.object({
     .string()
     .trim()
     .min(2)
-    .max(100),
+    .max(100)
+    .default("India"),
 
   postalCode: z
     .string()
     .trim()
     .regex(/^\d{6}$/, "Postal code must be 6 digits"),
-
-  isTransportRequired: z.boolean().default(false),
-
-  isHostelRequired: z.boolean().default(false),
 });
 
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;

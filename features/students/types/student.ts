@@ -1,7 +1,6 @@
 import {
   Gender,
   StudentCategory,
-  StudentStatus,
 } from "@prisma/client";
 
 /**
@@ -10,8 +9,8 @@ import {
  */
 export interface StudentListItem {
   id: string;
+
   studentCode: string;
-  admissionNumber: string;
 
   firstName: string;
   middleName: string | null;
@@ -21,11 +20,25 @@ export interface StudentListItem {
 
   mobile: string | null;
 
-  status: StudentStatus;
+  registrationDate: Date;
 
   createdAt: Date;
-}
 
+  currentEnrollment?: {
+    enrollmentId: string;
+
+    academicYearId: string;
+    academicYearName: string;
+
+    classId: string;
+    className: string;
+
+    sectionId: string;
+    sectionName: string;
+
+    rollNumber: string | null;
+  } | null;
+}
 /**
  * Student Details
  * Used for GET /api/students/:id
@@ -34,7 +47,6 @@ export interface StudentDetails {
   id: string;
 
   studentCode: string;
-  admissionNumber: string;
 
   emisNumber: string | null;
   apaarId: string | null;
@@ -63,11 +75,9 @@ export interface StudentDetails {
 
   photo: string | null;
 
-  admissionDate: Date;
-
   previousSchool: string | null;
 
-  status: StudentStatus;
+  registrationDate: Date;
 
   remarks: string | null;
 
@@ -83,7 +93,7 @@ export interface StudentDetails {
 
   guardianName: string | null;
   guardianRelation: string | null;
-  guardianMobile: string |null;
+  guardianMobile: string | null;
   guardianEmail: string | null;
 
   addressLine1: string;
@@ -95,9 +105,6 @@ export interface StudentDetails {
   country: string;
   postalCode: string;
 
-  isTransportRequired: boolean;
-  isHostelRequired: boolean;
-
   createdAt: Date;
   updatedAt: Date;
 }
@@ -107,7 +114,7 @@ export interface StudentDetails {
  */
 export interface StudentQuery {
   search?: string;
-  status?: StudentStatus;
+
   page?: number;
   limit?: number;
 }

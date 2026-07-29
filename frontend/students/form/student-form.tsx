@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-
 import {
   FormProvider,
   useForm,
+  type Resolver,
 } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -16,11 +15,7 @@ import {
 
 import { useStudentForm } from "../hooks/use-student-form";
 
-import { AdmissionInformation } from "./admission-information";
-import { PersonalInformation } from "./personal-information";
-import { ParentInformation } from "./parent-information";
-import { AddressInformation } from "./address-information";
-import { FormActions } from "./form-actions";
+import { StudentWizard } from "./student-wizard";
 
 interface StudentFormProps {
   studentId?: string;
@@ -32,96 +27,132 @@ export function StudentForm({
   defaultValues,
 }: StudentFormProps) {
   const form = useForm<StudentFormValues>({
-    resolver: zodResolver(studentFormSchema),
-
+    resolver: zodResolver(studentFormSchema) as Resolver<StudentFormValues>,
     mode: "onBlur",
 
-    // defaultValues: {
-    //   studentCode: "",
-    //   nationality: "Indian",
-    //   country: "India",
-    //   status: "ACTIVE",
-    //   isTransportRequired: false,
-    //   isHostelRequired: false,
-    //   ...defaultValues,
-    // },
-        defaultValues: {
-  studentCode: "",
-  admissionNumber: "",
-  admissionDate: "",
+    defaultValues: {
+      // Identification
+      emisNumber: "",
+      apaarId: "",
+      penNumber: "",
 
-  status: "ACTIVE",
+      // Personal Information
+      firstName: "",
+      middleName: "",
+      lastName: "",
 
-  firstName: "",
-  middleName: "",
-  lastName: "",
+      gender: undefined as never,
+      dateOfBirth: "",
 
-  gender: undefined as never, // or a default enum value
-  dateOfBirth: "",
+      bloodGroup: "",
+      religion: "",
+      category: undefined,
 
-  bloodGroup: "",
-  religion: "",
-  category: "",
-  caste: "",
+      caste: "",
+      nationality: "Indian",
 
-  nationality: "Indian",
+      aadhaarNumber: "",
+      birthCertificateNo: "",
 
-  aadhaarNumber: "",
-  birthCertificateNo: "",
+      email: "",
+      mobile: "",
 
-  email: "",
-  mobile: "",
+      photo: "",
 
-  previousSchool: "",
-  remarks: "",
+      previousSchool: "",
+      remarks: "",
 
-  fatherName: "",
-  fatherOccupation: "",
-  fatherMobile: "",
-  fatherEmail: "",
+      // Parent Information
+      fatherName: "",
+      fatherOccupation: "",
+      fatherMobile: "",
+      fatherEmail: "",
 
-  motherName: "",
-  motherOccupation: "",
-  motherMobile: "",
-  motherEmail: "",
+      motherName: "",
+      motherOccupation: "",
+      motherMobile: "",
+      motherEmail: "",
 
-  guardianName: "",
-  guardianRelation: "",
-  guardianMobile: "",
-  guardianEmail: "",
+      guardianName: "",
+      guardianRelation: "",
+      guardianMobile: "",
+      guardianEmail: "",
 
-  addressLine1: "",
-  addressLine2: "",
-  city: "",
-  district: "",
-  state: "",
-  country: "India",
-  postalCode: "",
+      // Address
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      district: "",
+      state: "",
+      country: "India",
+      postalCode: "",
 
-  isTransportRequired: false,
-  isHostelRequired: false,
-
-  ...defaultValues,
-},
-
-
+      ...defaultValues,
+    },
   });
 
   const { handleSubmit, reset } = form;
 
-  const { onSubmit, isSubmitting } =
-    useStudentForm({
-      studentId,
-    });
+  const { onSubmit, isSubmitting } = useStudentForm({
+    studentId,
+    form,
+  });
 
   useEffect(() => {
     if (defaultValues) {
       reset({
+        emisNumber: "",
+        apaarId: "",
+        penNumber: "",
+
+        firstName: "",
+        middleName: "",
+        lastName: "",
+
+        gender: undefined as never,
+        dateOfBirth: "",
+
+        bloodGroup: "",
+        religion: "",
+        category: undefined,
+
+        caste: "",
         nationality: "Indian",
+
+        aadhaarNumber: "",
+        birthCertificateNo: "",
+
+        email: "",
+        mobile: "",
+
+        photo: "",
+
+        previousSchool: "",
+        remarks: "",
+
+        fatherName: "",
+        fatherOccupation: "",
+        fatherMobile: "",
+        fatherEmail: "",
+
+        motherName: "",
+        motherOccupation: "",
+        motherMobile: "",
+        motherEmail: "",
+
+        guardianName: "",
+        guardianRelation: "",
+        guardianMobile: "",
+        guardianEmail: "",
+
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        district: "",
+        state: "",
         country: "India",
-        status: "ACTIVE",
-        isTransportRequired: false,
-        isHostelRequired: false,
+        postalCode: "",
+
         ...defaultValues,
       });
     }
@@ -133,17 +164,9 @@ export function StudentForm({
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8"
       >
-        <AdmissionInformation form={form} />
-
-        <PersonalInformation form={form} />
-
-        <ParentInformation />
-
-        <AddressInformation />
-
-        <FormActions
+        <StudentWizard
+          form={form}
           isSubmitting={isSubmitting}
-          isEdit={Boolean(studentId)}
         />
       </form>
     </FormProvider>

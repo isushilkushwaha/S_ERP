@@ -15,9 +15,9 @@ export interface NavigationItem {
 
   readonly title: string;
 
-  readonly href: string;
+  readonly href?: string;
 
-  readonly icon: LucideIcon;
+  readonly icon?: LucideIcon;
 
   readonly permission: Permission;
 

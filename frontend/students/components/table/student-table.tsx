@@ -16,9 +16,9 @@ import { StudentToolbar } from "./student-toolbar";
 import { StudentPagination } from "./student-pagination";
 
 import {
-  LoadingState,
   EmptyState,
   ErrorState,
+  LoadingState,
 } from "../states";
 
 import { useStudentTable } from "../../hooks";
@@ -26,17 +26,9 @@ import { useStudentTable } from "../../hooks";
 export function StudentTable() {
   const {
     table,
-
     filters,
-
     studentsQuery,
-
     setSearch,
-
-    setClass,
-    setSection,
-    setStatus,
-
     resetFilters,
   } = useStudentTable({
     columns: studentColumns,
@@ -50,8 +42,7 @@ export function StudentTable() {
     return (
       <ErrorState
         description={
-          studentsQuery.error?.message ??
-          "Unable to load students."
+          studentsQuery.error?.message ?? "Unable to load students."
         }
         onRetry={() => studentsQuery.refetch()}
       />
@@ -59,26 +50,25 @@ export function StudentTable() {
   }
 
   return (
-    <div className="space-y-6">
-      <StudentToolbar
-        search={filters.search ?? ""}
-        classId={filters.classId}
-        sectionId={filters.sectionId}
-        status={filters.status}
-        onSearchChange={setSearch}
-        onClassChange={setClass}
-        onSectionChange={setSection}
-        onStatusChange={setStatus}
-        onResetFilters={resetFilters}
-      />
+    <div className="flex flex-1 flex-col overflow-hidden gap-4">
+      {/* 1. Fixed Toolbar (Search & Reset) */}
+      <div className="shrink-0">
+        <StudentToolbar
+          search={filters.search ?? ""}
+          onSearchChange={setSearch}
+          onResetFilters={resetFilters}
+        />
+      </div>
 
-      <div className="rounded-lg border">
+      {/* 2. Scrollable Table Container */}
+      <div className="relative flex-1 overflow-auto rounded-md border border-border/60 bg-background/50">
         <Table>
-          <TableHeader>
+          {/* Sticky Table Headers */}
+          <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="h-10 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -92,16 +82,15 @@ export function StudentTable() {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={
-                    row.getIsSelected() && "selected"
-                  }
+                  data-state={row.getIsSelected() ? "selected" : undefined}
+                  className="transition-colors hover:bg-muted/40 data-[state=selected]:bg-muted"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-3 text-sm">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -113,8 +102,8 @@ export function StudentTable() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={table.getAllColumns().length}
-                  className="h-40"
+                  colSpan={table.getVisibleLeafColumns().length}
+                  className="h-60 text-center"
                 >
                   <EmptyState />
                 </TableCell>
@@ -124,12 +113,13 @@ export function StudentTable() {
         </Table>
       </div>
 
-      <StudentPagination
-        table={table}
-        totalItems={
-          studentsQuery.data?.meta.totalItems ?? 0
-        }
-      />
+      {/* 3. Fixed Pagination at Bottom */}
+      <div className="shrink-0 pt-2">
+        <StudentPagination
+          table={table}
+          totalItems={studentsQuery.data?.meta.totalItems ?? 0}
+        />
+      </div>
     </div>
   );
 }

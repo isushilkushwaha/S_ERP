@@ -53,30 +53,70 @@ export function DeleteStudentDialog({
             Delete Student
           </AlertDialogTitle>
 
-          <AlertDialogDescription>
-            Are you sure you want to delete
-            <span className="font-semibold">
-              {" "}
-              {fullName}
-            </span>
-            ?
-            <br />
-            <br />
-            Admission No:
-            <span className="font-medium">
-              {" "}
-              {student.admissionNumber}
-            </span>
-            <br />
-            <br />
-            This action cannot be undone.
+          <AlertDialogDescription className="space-y-3">
+            <p>
+              Are you sure you want to permanently delete this
+              student registration?
+            </p>
+
+            <div className="rounded-md border bg-muted/50 p-4 text-sm">
+              <div className="grid gap-2">
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">
+                    Student
+                  </span>
+
+                  <span className="font-semibold">
+                    {fullName}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">
+                    Student Code
+                  </span>
+
+                  <span>{student.studentCode}</span>
+                </div>
+
+                {student.mobile && (
+                  <div className="flex justify-between">
+                    <span className="font-medium text-muted-foreground">
+                      Mobile
+                    </span>
+
+                    <span>{student.mobile}</span>
+                  </div>
+                )}
+
+                {student.emisNumber && (
+                  <div className="flex justify-between">
+                    <span className="font-medium text-muted-foreground">
+                      EMIS
+                    </span>
+
+                    <span>{student.emisNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <p className="text-destructive font-medium">
+              This action cannot be undone.
+            </p>
+
+            <p className="text-sm text-muted-foreground">
+              Deleting this student will permanently remove the
+              student's master registration record. If the student
+              has enrollment, fee, attendance, examination, or other
+              related records, deletion may be restricted depending on
+              your system rules.
+            </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel
-            disabled={loading}
-          >
+          <AlertDialogCancel disabled={loading}>
             Cancel
           </AlertDialogCancel>
 
@@ -84,7 +124,6 @@ export function DeleteStudentDialog({
             disabled={loading}
             onClick={(event) => {
               event.preventDefault();
-
               onConfirm(student);
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

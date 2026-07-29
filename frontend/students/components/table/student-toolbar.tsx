@@ -1,96 +1,88 @@
 "use client";
 
-import Link from "next/link";
-import { Plus } from "lucide-react";
+import * as React from "react";
+import { RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { SearchInput } from "../filters/search-input";
-import { ClassFilter } from "../filters/class-filter";
-import { SectionFilter } from "../filters/section-filter";
-import { StatusFilter } from "../filters/status-filter";
-
-import { STUDENT_ROUTES } from "../../constants";
-import type { StudentStatus } from "../../types";
 
 interface StudentToolbarProps {
   search: string;
-
-  classId?: string;
-
-  sectionId?: string;
-
-  status?: StudentStatus;
-
   onSearchChange: (value: string) => void;
-
-  onClassChange: (value?: string) => void;
-
-  onSectionChange: (value?: string) => void;
-
-  onStatusChange: (value?: StudentStatus) => void;
-
   onResetFilters: () => void;
+
+  /**
+   * Optional toolbar actions.
+   *
+   * Example:
+   * actions={
+   *   <>
+   *     <RemoveStudentButton />
+   *     <ExportStudentsButton />
+   *   </>
+   * }
+   */
+  actions?: React.ReactNode;
 }
 
 export function StudentToolbar({
   search,
-
-  classId,
-
-  sectionId,
-
-  status,
-
   onSearchChange,
-
-  onClassChange,
-
-  onSectionChange,
-
-  onStatusChange,
-
   onResetFilters,
+  actions,
 }: StudentToolbarProps) {
+  const hasActiveFilters = Boolean(search.trim());
+
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex flex-1 flex-wrap items-center gap-2">
-        <SearchInput
-          value={search}
-          onChange={onSearchChange}
-        />
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      {/* Left Section */}
+      <div className="flex flex-1 flex-wrap items-center gap-2.5">
+        <div className="w-full sm:max-w-sm">
+          <SearchInput
+            value={search}
+            onChange={onSearchChange}
+          />
+        </div>
 
-        <ClassFilter
-          value={classId}
-          onChange={onClassChange}
-          options={[]}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onResetFilters}
+                  disabled={!hasActiveFilters}
+                  className="gap-2"
+                  aria-label="Reset filters"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  <span>Reset</span>
+                </Button>
+              }
+            />
 
-        <SectionFilter
-          value={sectionId}
-          onChange={onSectionChange}
-          sections={[]}
-        />
-
-        <StatusFilter
-          value={status}
-          onChange={onStatusChange}
-        />
-
-        <Button
-          variant="outline"
-          onClick={onResetFilters}
-        >
-          Reset
-        </Button>
+            <TooltipContent className="text-xs font-medium">
+              Clear Search
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
-      <Link href={STUDENT_ROUTES.CREATE}>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Student
-        </Button>
-      </Link>
+      {/* Right Section */}
+      <div className="flex w-full justify-end lg:w-auto">
+        <div className="flex flex-wrap items-center gap-2">
+          {actions}
+        </div>
+      </div>
     </div>
   );
 }

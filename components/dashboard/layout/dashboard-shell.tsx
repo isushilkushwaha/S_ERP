@@ -40,7 +40,7 @@ export function DashboardShell({
         <DashboardSidebar session={session}/>
 
         <div className="flex min-w-0 flex-col">
-          <DashboardHeader session={session} />
+          <DashboardHeader session={null} />
 
           <DashboardContent>{children}</DashboardContent>
 

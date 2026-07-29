@@ -10,7 +10,6 @@ import {
 import type { Table } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-
 import {
   Select,
   SelectContent,
@@ -23,7 +22,6 @@ import { STUDENT_PAGE_SIZE_OPTIONS } from "../../constants";
 
 interface StudentPaginationProps<TData> {
   table: Table<TData>;
-
   totalItems: number;
 }
 
@@ -32,39 +30,29 @@ export function StudentPagination<TData>({
   totalItems,
 }: StudentPaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-2 py-4">
+    <div className="flex items-center justify-between px-4 py-3 border-t bg-background shrink-0">
       <div className="text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {totalItems} row(s) selected
+        {table.getFilteredSelectedRowModel().rows.length} of {totalItems} row(s) selected
       </div>
 
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">
-            Rows per page
-          </p>
+          <p className="text-sm font-medium">Rows per page</p>
 
           <Select
             value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) =>
-              table.setPageSize(Number(value))
-            }
+            onValueChange={(value) => table.setPageSize(Number(value))}
           >
             <SelectTrigger className="h-8 w-[80px]">
               <SelectValue />
             </SelectTrigger>
 
             <SelectContent side="top">
-              {STUDENT_PAGE_SIZE_OPTIONS.map(
-                (pageSize) => (
-                  <SelectItem
-                    key={pageSize}
-                    value={`${pageSize}`}
-                  >
-                    {pageSize}
-                  </SelectItem>
-                )
-              )}
+              {STUDENT_PAGE_SIZE_OPTIONS.map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

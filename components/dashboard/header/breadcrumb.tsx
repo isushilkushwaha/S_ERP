@@ -30,7 +30,9 @@ export function DashboardBreadcrumb() {
       .filter((segment) => !/^\d+$/.test(segment));
 
     return segments.map((segment, index) => ({
-      label: formatSegment(segment),
+      label: isId(segment)
+  ? "Student Profile"
+  : formatSegment(segment),
       href: `/dashboard/${segments.slice(0, index + 1).join("/")}`,
       isLast: index === segments.length - 1,
     }));
@@ -68,4 +70,13 @@ export function DashboardBreadcrumb() {
       </BreadcrumbList>
     </Breadcrumb>
   );
+}
+
+function isId(segment: string) {
+  // Return true for common id patterns (numeric ids or UUIDs)
+  const isNumeric = /^\d+$/.test(segment);
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    segment
+  );
+  return isNumeric || isUuid;
 }

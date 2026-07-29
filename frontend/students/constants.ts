@@ -1,7 +1,5 @@
 // frontend/students/constants.ts
 
-import type { StudentStatus } from "./types";
-
 /**
  * Module
  */
@@ -28,7 +26,6 @@ export const STUDENT_API_ENDPOINTS = {
  * Pagination
  */
 export const STUDENT_DEFAULT_PAGE = 1;
-
 export const STUDENT_DEFAULT_PAGE_SIZE = 10;
 
 export const STUDENT_PAGE_SIZE_OPTIONS = [
@@ -42,48 +39,18 @@ export const STUDENT_PAGE_SIZE_OPTIONS = [
  * Search
  */
 export const STUDENT_SEARCH_PLACEHOLDER =
-  "Search by admission no, name, mobile...";
-
-/**
- * Status
- */
-export const STUDENT_STATUS_OPTIONS = [
-  {
-    label: "Active",
-    value: "ACTIVE",
-  },
-  {
-    label: "Inactive",
-    value: "INACTIVE",
-  },
-  {
-    label: "Transferred",
-    value: "TRANSFERRED",
-  },
-  {
-    label: "Alumni",
-    value: "ALUMNI",
-  },
-] as const;
-
-export const STUDENT_STATUS_VALUES = [
-  "ACTIVE",
-  "INACTIVE",
-  "TRANSFERRED",
-  "ALUMNI",
-] as const;
+  "Search by Student Code, Name or Mobile...";
 
 /**
  * Table
  */
 export const STUDENT_TABLE_COLUMNS = {
   SELECT: "select",
-  ADMISSION_NUMBER: "admissionNumber",
+  STUDENT_CODE: "studentCode",
   NAME: "name",
-  CLASS: "class",
-  SECTION: "section",
-  MOBILE: "mobileNumber",
-  STATUS: "status",
+  GENDER: "gender",
+  MOBILE: "mobile",
+  REGISTRATION_DATE: "registrationDate",
   ACTIONS: "actions",
 } as const;
 
@@ -91,20 +58,39 @@ export const STUDENT_TABLE_COLUMNS = {
  * Messages
  */
 export const STUDENT_MESSAGES = {
-  CREATE_SUCCESS: "Student created successfully.",
+  CREATE_SUCCESS: "Student registered successfully.",
   UPDATE_SUCCESS: "Student updated successfully.",
   DELETE_SUCCESS: "Student deleted successfully.",
 
-  CREATE_ERROR: "Failed to create student.",
+  CREATE_ERROR: "Failed to register student.",
   UPDATE_ERROR: "Failed to update student.",
   DELETE_ERROR: "Failed to delete student.",
 } as const;
 
-// Add these exports to your existing constants.ts
-export const GENDER_OPTIONS = ["MALE", "FEMALE", "OTHER"] as const;
-export const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
-export const CATEGORY_OPTIONS = ["GENERAL", "OBC", "SC", "ST", "EWS"] as const;
+/**
+ * Master Data
+ */
+export const GENDER_OPTIONS = [
+  "MALE",
+  "FEMALE",
+  "OTHER",
+] as const;
 
+export const BLOOD_GROUP_OPTIONS = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+] as const;
 
-
-
+export const CATEGORY_OPTIONS = [
+  "GENERAL",
+  "OBC",
+  "SC",
+  "ST",
+  "EWS",
+] as const;

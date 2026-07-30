@@ -128,11 +128,6 @@ enum StudentStatus {
   TRANSFERRED
 }
 
-enum AcademicYearStatus {
-  ACTIVE
-  CLOSED
-}
-
 enum Medium {
   ENGLISH
   HINDI
@@ -169,24 +164,6 @@ enum DocumentType {
   INCOME_CERTIFICATE
   MARKSHEET
   OTHER
-}
-
-model AcademicYear {
-  id          String             @id @default(uuid())
-  name        String             @unique
-  code        String?            @unique
-  startDate   DateTime
-  endDate     DateTime
-  isCurrent   Boolean            @default(false)
-  status      AcademicYearStatus @default(ACTIVE)
-  description String?
-
-  enrollments StudentEnrollment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status])
 }
 
 model Class {
@@ -388,8 +365,8 @@ model SchoolProfile {
   schoolCode String? @unique @db.VarChar(30)
 
   // Branding
-  logoUrl String? @db.Text
-  faviconUrl   String?
+  logoUrl    String? @db.Text
+  faviconUrl String?
 
   // Contact Information
   email          String? @db.VarChar(150)
@@ -426,4 +403,47 @@ model SchoolProfile {
   deletedAt DateTime?
 
   @@map("school_profiles")
+}
+
+//------------------------------------------------AcademicYear-------------------------------------------------------------------
+
+enum AcademicYearStatus {
+  UPCOMING
+  ACTIVE
+  ARCHIVED
+}
+
+model AcademicYear {
+  id String @id @default(cuid())
+
+  /// Display Name (Example: 2026-27)
+  name String @unique
+
+  /// Unique Code (Example: AY202627)
+  code String @unique
+
+  /// Academic Session Duration
+  startDate DateTime
+  endDate   DateTime
+
+  /// Session Status
+  status AcademicYearStatus @default(UPCOMING)
+
+  /// Optional Notes
+  description String?
+
+  /// Used for sorting
+  sortOrder Int @default(0)
+
+  /// Audit Fields
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  /// Relations
+  studentEnrollments StudentEnrollment[]
+
+  @@index([status])
+  @@index([deletedAt])
+  
 }

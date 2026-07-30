@@ -4,7 +4,6 @@ import {
   PrismaClient,
   RoleName,
   AdminType,
-  AcademicYearStatus,
   Medium,
   
 } from "@prisma/client";
@@ -145,45 +144,70 @@ async function main() {
 // Academic Years
 // ------------------------------------------------------------------
 
+console.log("🌱 Seeding Academic Years...");
+
 const academicYears = [
   {
     name: "2025-26",
-    code: "2025-26",
+    code: "AY202526",
     startDate: new Date("2025-04-01"),
     endDate: new Date("2026-03-31"),
-    isCurrent: false,
+    status: "ARCHIVED",
+    sortOrder: 1,
+    description: "Academic Session 2025-26",
   },
   {
     name: "2026-27",
-    code: "2026-27",
+    code: "AY202627",
     startDate: new Date("2026-04-01"),
     endDate: new Date("2027-03-31"),
-    isCurrent: true,
+    status: "ACTIVE",
+    sortOrder: 2,
+    description: "Current Academic Session",
   },
   {
     name: "2027-28",
-    code: "2027-28",
+    code: "AY202728",
     startDate: new Date("2027-04-01"),
     endDate: new Date("2028-03-31"),
-    isCurrent: false,
+    status: "UPCOMING",
+    sortOrder: 3,
+    description: "Upcoming Academic Session",
   },
 ];
 
 for (const year of academicYears) {
+  if (year.startDate >= year.endDate) {
+    throw new Error(`Invalid date range for ${year.name}`);
+  }
+
   await prisma.academicYear.upsert({
     where: {
-      name: year.name,
+      code: year.code,
     },
-    update: year,
+    update: {
+      name: year.name,
+      startDate: year.startDate,
+      endDate: year.endDate,
+      status: year.status,
+      sortOrder: year.sortOrder,
+      description: year.description,
+    },
     create: {
-      ...year,
-      status: AcademicYearStatus.ACTIVE,
+      name: year.name,
+      code: year.code,
+      startDate: year.startDate,
+      endDate: year.endDate,
+      status: year.status,
+      sortOrder: year.sortOrder,
+      description: year.description,
     },
   });
+
+  console.log(`✓ ${year.name}`);
 }
 
 console.log("✅ Academic Years seeded");
-
 // ------------------------------------------------------------------
 // Classes
 // ------------------------------------------------------------------

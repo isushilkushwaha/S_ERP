@@ -56,8 +56,18 @@ export const PERMISSIONS = {
   PROFILE_UPDATE: "profile.update",
 
   // Settings
-  SETTINGS_VIEW: "settings.view",
-  SETTINGS_MANAGE: "settings.manage",
+  // Settings
+SETTINGS_VIEW: "settings.view",
+SETTINGS_MANAGE: "settings.manage",
+
+// Academic Years
+ACADEMIC_YEARS_VIEW: "academic-years.view",
+ACADEMIC_YEARS_CREATE: "academic-years.create",
+ACADEMIC_YEARS_UPDATE: "academic-years.update",
+ACADEMIC_YEARS_DELETE: "academic-years.delete",
+ACADEMIC_YEARS_RESTORE: "academic-years.restore",
+ACADEMIC_YEARS_ACTIVATE: "academic-years.activate",
+ACADEMIC_YEARS_ARCHIVE: "academic-years.archive",
 } as const;
 
 export type Permission =

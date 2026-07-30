@@ -5,8 +5,10 @@ import {
   RoleName,
   AdminType,
   Medium,
+  AcademicYearStatus,
   
 } from "@prisma/client";
+
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -152,7 +154,7 @@ const academicYears = [
     code: "AY202526",
     startDate: new Date("2025-04-01"),
     endDate: new Date("2026-03-31"),
-    status: "ARCHIVED",
+    status: AcademicYearStatus.ARCHIVED,
     sortOrder: 1,
     description: "Academic Session 2025-26",
   },
@@ -161,7 +163,7 @@ const academicYears = [
     code: "AY202627",
     startDate: new Date("2026-04-01"),
     endDate: new Date("2027-03-31"),
-    status: "ACTIVE",
+    status: AcademicYearStatus.ACTIVE,
     sortOrder: 2,
     description: "Current Academic Session",
   },
@@ -170,7 +172,7 @@ const academicYears = [
     code: "AY202728",
     startDate: new Date("2027-04-01"),
     endDate: new Date("2028-03-31"),
-    status: "UPCOMING",
+    status: AcademicYearStatus.UPCOMING,
     sortOrder: 3,
     description: "Upcoming Academic Session",
   },

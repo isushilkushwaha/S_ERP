@@ -66,5 +66,4 @@ export interface CreateStudentRequest {
 /**
  * Update Student Request
  */
-export interface UpdateStudentRequest
-  extends Partial<CreateStudentRequest> {}
+export type UpdateStudentRequest = Partial<CreateStudentRequest>;

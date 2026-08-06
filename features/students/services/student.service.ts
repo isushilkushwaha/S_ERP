@@ -1,3 +1,5 @@
+// features/students/services/student.service.ts
+
 import { Prisma } from "@prisma/client";
 
 import { CreateStudentInput } from "../schemas/create-student.schema";
@@ -7,12 +9,20 @@ import { studentRepository } from "../repositories/student.repository";
 import { studentCodeService } from "./student-code.service";
 import type { RemoveStudentInput } from "../schemas/remove-student.schema";
 
-
 import { NotFoundError } from "@/lib/errors/not-found-error";
 
 export class StudentService {
-  updateRegistration(studentId: string, payload: { emisNumber?: string | null | undefined; apaarId?: string | null | undefined; penNumber?: string | null | undefined; }) {
-      throw new Error("Method not implemented.");
+  updateRegistration(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _studentId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _payload: {
+      emisNumber?: string | null | undefined;
+      apaarId?: string | null | undefined;
+      penNumber?: string | null | undefined;
+    }
+  ) {
+    throw new Error("Method not implemented.");
   }
   async getStudents(query: StudentQuery) {
     const page = query.page ?? 1;
@@ -90,7 +100,8 @@ export class StudentService {
     }
 
     // Student Code should never be updated manually
-    const { studentCode, ...updateData } = data as any;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { studentCode: _studentCode, ...updateData } = data as UpdateStudentInput & { studentCode?: unknown };
 
     const updatedStudent = await studentRepository.update(
       id,
@@ -104,27 +115,9 @@ export class StudentService {
     };
   }
 
-  // async deleteStudent(id: string) {
-  //   const student = await studentRepository.findById(id);
-
-  //   if (!student) {
-  //     throw new NotFoundError("Student not found.");
-  //   }
-
-  //   await studentRepository.softDelete(id);
-
-  //   return {
-  //     success: true,
-  //     message: "Student deleted successfully.",
-  //   };
-  // }
-
-  
-
-async removeStudent(
-  
+  async removeStudent(
     payload: RemoveStudentInput
-) {
+  ) {
     const student =
         await studentRepository.findByStudentCode(
             payload.studentCode
@@ -165,9 +158,7 @@ async removeStudent(
         message:
             "Student removed successfully.",
     };
-}
-
-  
+  }
 }
 
 export const studentService = new StudentService();

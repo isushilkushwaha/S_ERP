@@ -6,28 +6,31 @@ import {
   GENDER_OPTIONS,
 } from "../constants";
 
+// Helper validator for optional regex fields that can be empty strings
+const optionalRegex = (pattern: RegExp, errorMessage: string) =>
+  z
+    .string()
+    .trim()
+    .regex(pattern, errorMessage)
+    .optional()
+    .nullable()
+    .or(z.literal(""));
+
+// Helper validator for optional email fields that can be empty strings
+const optionalEmail = (errorMessage = "Invalid email") =>
+  z
+    .string()
+    .trim()
+    .email(errorMessage)
+    .optional()
+    .nullable()
+    .or(z.literal(""));
+
 export const studentFormSchema = z.object({
   // Government IDs
-  emisNumber: z
-    .string()
-    .trim()
-    .max(50)
-    .optional()
-    .nullable(),
-
-  apaarId: z
-    .string()
-    .trim()
-    .max(50)
-    .optional()
-    .nullable(),
-
-  penNumber: z
-    .string()
-    .trim()
-    .max(50)
-    .optional()
-    .nullable(),
+  emisNumber: z.string().trim().max(50).optional().nullable().or(z.literal("")),
+  apaarId: z.string().trim().max(50).optional().nullable().or(z.literal("")),
+  penNumber: z.string().trim().max(50).optional().nullable().or(z.literal("")),
 
   // Personal Information
   firstName: z
@@ -36,12 +39,7 @@ export const studentFormSchema = z.object({
     .min(2, "First name is required")
     .max(100),
 
-  middleName: z
-    .string()
-    .trim()
-    .max(100)
-    .optional()
-    .nullable(),
+  middleName: z.string().trim().max(100).optional().nullable().or(z.literal("")),
 
   lastName: z
     .string()
@@ -63,87 +61,46 @@ export const studentFormSchema = z.object({
   dateOfBirth: z.string().min(1, "Date of birth is required"),
 
   bloodGroup: z
-  .enum(BLOOD_GROUP_OPTIONS)
-  .optional()
-  .nullable()
-  .or(z.literal("")),
-
-  religion: z
-    .string()
-    .trim()
-    .max(100)
+    .enum(BLOOD_GROUP_OPTIONS)
     .optional()
-    .nullable(),
+    .nullable()
+    .or(z.literal("")),
+
+  religion: z.string().trim().max(100).optional().nullable().or(z.literal("")),
 
   category: z
-  .enum(CATEGORY_OPTIONS)
-  .optional()
-  .nullable()
-  .or(z.literal("")),
-
-  caste: z
-    .string()
-    .trim()
-    .max(100)
+    .enum(CATEGORY_OPTIONS)
     .optional()
-    .nullable(),
+    .nullable()
+    .or(z.literal("")),
+
+  caste: z.string().trim().max(100).optional().nullable().or(z.literal("")),
 
   nationality: z
     .string()
     .trim()
-    .min(2)
     .max(100)
-    .default("India"),
-
-  aadhaarNumber: z
-    .string()
-    .regex(
-      /^\d{12}$/,
-      "Aadhaar must contain exactly 12 digits"
-    )
+    .default("India")
     .optional()
-    .nullable(),
+    .nullable()
+    .or(z.literal("")),
 
-  birthCertificateNo: z
-    .string()
-    .trim()
-    .max(100)
-    .optional()
-    .nullable(),
+  aadhaarNumber: optionalRegex(
+    /^\d{12}$/,
+    "Aadhaar must contain exactly 12 digits"
+  ),
 
-  email: z
-    .string()
-    .email("Invalid email")
-    .optional()
-    .nullable(),
+  birthCertificateNo: z.string().trim().max(100).optional().nullable().or(z.literal("")),
 
-  mobile: z
-    .string()
-    .regex(
-      /^[6-9]\d{9}$/,
-      "Invalid mobile number"
-    )
-    .optional()
-    .nullable(),
+  email: optionalEmail("Invalid email"),
 
-  photo: z
-    .string()
-    .optional()
-    .nullable(),
+  mobile: optionalRegex(/^[6-9]\d{9}$/, "Invalid mobile number"),
 
-  previousSchool: z
-    .string()
-    .trim()
-    .max(255)
-    .optional()
-    .nullable(),
+  photo: z.string().optional().nullable().or(z.literal("")),
 
-  remarks: z
-    .string()
-    .trim()
-    .max(1000)
-    .optional()
-    .nullable(),
+  previousSchool: z.string().trim().max(255).optional().nullable().or(z.literal("")),
+
+  remarks: z.string().trim().max(1000).optional().nullable().or(z.literal("")),
 
   // Father
   fatherName: z
@@ -152,85 +109,31 @@ export const studentFormSchema = z.object({
     .min(2, "Father name is required")
     .max(150),
 
-  fatherOccupation: z
-    .string()
-    .trim()
-    .max(150)
-    .optional()
-    .nullable(),
+  fatherOccupation: z.string().trim().max(150).optional().nullable().or(z.literal("")),
 
   fatherMobile: z
     .string()
-    .regex(
-      /^[6-9]\d{9}$/,
-      "Invalid father mobile number"
-    ),
+    .regex(/^[6-9]\d{9}$/, "Invalid father mobile number"),
 
-  fatherEmail: z
-    .string()
-    .email("Invalid father email")
-    .optional()
-    .nullable(),
+  fatherEmail: optionalEmail("Invalid father email"),
 
   // Mother
-  motherName: z
-    .string()
-    .trim()
-    .max(150)
-    .optional()
-    .nullable(),
+  motherName: z.string().trim().max(150).optional().nullable().or(z.literal("")),
 
-  motherOccupation: z
-    .string()
-    .trim()
-    .max(150)
-    .optional()
-    .nullable(),
+  motherOccupation: z.string().trim().max(150).optional().nullable().or(z.literal("")),
 
-  motherMobile: z
-    .string()
-    .regex(
-      /^[6-9]\d{9}$/,
-      "Invalid mother mobile number"
-    )
-    .optional()
-    .nullable(),
+  motherMobile: optionalRegex(/^[6-9]\d{9}$/, "Invalid mother mobile number"),
 
-  motherEmail: z
-    .string()
-    .email("Invalid mother email")
-    .optional()
-    .nullable(),
+  motherEmail: optionalEmail("Invalid mother email"),
 
   // Guardian
-  guardianName: z
-    .string()
-    .trim()
-    .max(150)
-    .optional()
-    .nullable(),
+  guardianName: z.string().trim().max(150).optional().nullable().or(z.literal("")),
 
-  guardianRelation: z
-    .string()
-    .trim()
-    .max(100)
-    .optional()
-    .nullable(),
+  guardianRelation: z.string().trim().max(100).optional().nullable().or(z.literal("")),
 
-  guardianMobile: z
-    .string()
-    .regex(
-      /^[6-9]\d{9}$/,
-      "Invalid guardian mobile number"
-    )
-    .optional()
-    .nullable(),
+  guardianMobile: optionalRegex(/^[6-9]\d{9}$/, "Invalid guardian mobile number"),
 
-  guardianEmail: z
-    .string()
-    .email("Invalid guardian email")
-    .optional()
-    .nullable(),
+  guardianEmail: optionalEmail("Invalid guardian email"),
 
   // Address
   addressLine1: z
@@ -239,12 +142,7 @@ export const studentFormSchema = z.object({
     .min(5, "Address is required")
     .max(255),
 
-  addressLine2: z
-    .string()
-    .trim()
-    .max(255)
-    .optional()
-    .nullable(),
+  addressLine2: z.string().trim().max(255).optional().nullable().or(z.literal("")),
 
   city: z
     .string()
@@ -273,12 +171,7 @@ export const studentFormSchema = z.object({
 
   postalCode: z
     .string()
-    .regex(
-      /^\d{6}$/,
-      "Postal code must be 6 digits"
-    ),
+    .regex(/^\d{6}$/, "Postal code must be 6 digits"),
 });
 
-export type StudentFormValues = z.infer<
-  typeof studentFormSchema
->;
+export type StudentFormValues = z.infer<typeof studentFormSchema>;

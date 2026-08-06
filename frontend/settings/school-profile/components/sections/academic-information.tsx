@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,7 +35,7 @@ export function AcademicInformation() {
         </h3>
 
         <p className="text-sm text-muted-foreground">
-          Configure your school's academic board and affiliation details.
+          Configure your schools academic board, affiliation, and admission setup details.
         </p>
       </div>
 
@@ -112,6 +113,55 @@ export function AcademicInformation() {
             </FormItem>
           )}
         />
+      </div>
+
+      {/* ADMISSION CONFIGURATION SUBSECTION */}
+      <div className="border-t pt-6 space-y-4">
+        <div>
+          <h4 className="text-md font-semibold">
+            Admission Configuration
+          </h4>
+          <p className="text-xs text-muted-foreground">
+            Configure default prefix formats for automatic admission number generation.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="admissionPrefix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-1">
+                  <span>Admission Prefix</span>
+                  <span className="text-destructive">*</span>
+                </FormLabel>
+
+                <FormControl>
+                  <Input
+                    {...field}
+                    value={field.value ?? "ADM"}
+                    maxLength={10}
+                    placeholder="ADM"
+                    onChange={(e) => {
+                      field.onChange(e.target.value.toUpperCase());
+                    }}
+                    className="font-mono uppercase"
+                  />
+                </FormControl>
+
+                <FormDescription>
+                  Used while generating Admission Numbers. Example:{" "}
+                  <span className="font-mono font-semibold">
+                    {(field.value || "ADM").toUpperCase()}-2025-0001
+                  </span>
+                </FormDescription>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </section>
   );

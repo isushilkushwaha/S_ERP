@@ -8,7 +8,6 @@ import {
   MapPin,
   Building,
   Globe,
-  Hash,
   Map,
   AlertCircle,
   Save,

@@ -1,3 +1,5 @@
+
+
 import { Prisma, PrismaClient } from "@prisma/client";
 
 import { AcademicYearRepository } from "./academic-year.repository";
@@ -13,6 +15,7 @@ import {
 } from "../types/academic-year.types";
 
 import {
+  ACADEMIC_YEAR_ERRORS,
   ACADEMIC_YEAR_STATUS,
   DEFAULT_QUERY_OPTIONS,
   QUERY_MODE,
@@ -24,7 +27,7 @@ export class PrismaAcademicYearRepository
   constructor(private readonly prisma: PrismaClient) {}
 
   /* -------------------------------------------------------------------------- */
-  /*                                DTO Mapper                                  */
+  /*                                 DTO Mapper                                 */
   /* -------------------------------------------------------------------------- */
 
   private toDTO(entity: AcademicYearEntity): AcademicYearDTO {
@@ -51,7 +54,7 @@ export class PrismaAcademicYearRepository
   }
 
   /* -------------------------------------------------------------------------- */
-  /*                             Pagination Meta                               */
+  /*                              Pagination Meta                               */
   /* -------------------------------------------------------------------------- */
 
   private buildPaginationMeta(
@@ -75,7 +78,7 @@ export class PrismaAcademicYearRepository
   }
 
   /* -------------------------------------------------------------------------- */
-  /*                               Where Builder                               */
+  /*                                Where Builder                               */
   /* -------------------------------------------------------------------------- */
 
   private buildWhereClause(
@@ -124,7 +127,7 @@ export class PrismaAcademicYearRepository
   }
 
   /* -------------------------------------------------------------------------- */
-  /*                             Pagination Config                              */
+  /*                              Pagination Config                             */
   /* -------------------------------------------------------------------------- */
 
   protected getPagination(options: AcademicYearQueryOptions) {
@@ -144,296 +147,349 @@ export class PrismaAcademicYearRepository
     };
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   Create                                   */
+  /* -------------------------------------------------------------------------- */
+
+  async create(
+    data: AcademicYearRepositoryCreateInput
+  ): Promise<AcademicYearDTO> {
+    try {
+      const academicYear = await this.prisma.academicYear.create({
+        data: {
+          name: data.name,
+          code: data.code,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          status: data.status,
+          description: data.description,
+          sortOrder: data.sortOrder ?? 0,
+        },
+      });
+
+      return this.toDTO(academicYear);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const target = (error.meta?.target as string[]) || [];
+
+        if (target.includes("name")) {
+          throw new Error(ACADEMIC_YEAR_ERRORS.DUPLICATE_NAME);
+        }
+        if (target.includes("code")) {
+          throw new Error(ACADEMIC_YEAR_ERRORS.DUPLICATE_CODE);
+        }
+      }
+      throw error;
+    }
+  }
 
   /* -------------------------------------------------------------------------- */
-/*                                   Create                                   */
-/* -------------------------------------------------------------------------- */
+  /*                                   Update                                   */
+  /* -------------------------------------------------------------------------- */
 
-async create(
-  data: AcademicYearRepositoryCreateInput
-): Promise<AcademicYearDTO> {
-  const academicYear = await this.prisma.academicYear.create({
-    data: {
-      name: data.name,
-      code: data.code,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      status: data.status,
-      description: data.description,
-      sortOrder: data.sortOrder ?? 0,
-    },
-  });
+  async update(
+    id: string,
+    data: AcademicYearRepositoryUpdateInput
+  ): Promise<AcademicYearDTO> {
+    try {
+      const academicYear = await this.prisma.academicYear.update({
+        where: {
+          id,
+        },
+        data: {
+          ...(data.name !== undefined && { name: data.name }),
+          ...(data.code !== undefined && { code: data.code }),
+          ...(data.startDate !== undefined && {
+            startDate: data.startDate,
+          }),
+          ...(data.endDate !== undefined && {
+            endDate: data.endDate,
+          }),
+          ...(data.status !== undefined && {
+            status: data.status,
+          }),
+          ...(data.description !== undefined && {
+            description: data.description,
+          }),
+          ...(data.sortOrder !== undefined && {
+            sortOrder: data.sortOrder,
+          }),
+        },
+      });
 
-  return this.toDTO(academicYear);
-}
+      return this.toDTO(academicYear);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const target = (error.meta?.target as string[]) || [];
 
-/* -------------------------------------------------------------------------- */
-/*                                   Update                                   */
-/* -------------------------------------------------------------------------- */
+        if (target.includes("name")) {
+          throw new Error(ACADEMIC_YEAR_ERRORS.DUPLICATE_NAME);
+        }
+        if (target.includes("code")) {
+          throw new Error(ACADEMIC_YEAR_ERRORS.DUPLICATE_CODE);
+        }
+      }
+      throw error;
+    }
+  }
 
-async update(
-  id: string,
-  data: AcademicYearRepositoryUpdateInput
-): Promise<AcademicYearDTO> {
-  const academicYear = await this.prisma.academicYear.update({
-    where: {
-      id,
-    },
-    data: {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.code !== undefined && { code: data.code }),
-      ...(data.startDate !== undefined && {
-        startDate: data.startDate,
-      }),
-      ...(data.endDate !== undefined && {
-        endDate: data.endDate,
-      }),
-      ...(data.status !== undefined && {
-        status: data.status,
-      }),
-      ...(data.description !== undefined && {
-        description: data.description,
-      }),
-      ...(data.sortOrder !== undefined && {
-        sortOrder: data.sortOrder,
-      }),
-    },
-  });
+  /* -------------------------------------------------------------------------- */
+  /*                              Permanent Delete                              */
+  /* -------------------------------------------------------------------------- */
 
-  return this.toDTO(academicYear);
-}
-
-/* -------------------------------------------------------------------------- */
-/*                              Permanent Delete                              */
-/* -------------------------------------------------------------------------- */
-
-async delete(id: string): Promise<void> {
-  await this.prisma.academicYear.delete({
-    where: {
-      id,
-    },
-  });
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                Soft Delete                                 */
-/* -------------------------------------------------------------------------- */
-
-async softDelete(id: string): Promise<void> {
-  await this.prisma.academicYear.update({
-    where: {
-      id,
-    },
-    data: {
-      deletedAt: new Date(),
-    },
-  });
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                   Restore                                  */
-/* -------------------------------------------------------------------------- */
-
-async restore(id: string): Promise<AcademicYearDTO> {
-  const academicYear = await this.prisma.academicYear.update({
-    where: {
-      id,
-    },
-    data: {
-      deletedAt: null,
-    },
-  });
-
-  return this.toDTO(academicYear);
-}
- /* -------------------------------------------------------------------------- */
-/*                                 Find By Id                                 */
-/* -------------------------------------------------------------------------- */
-
-async findById(id: string): Promise<AcademicYearDTO | null> {
-  const academicYear = await this.prisma.academicYear.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-    },
-  });
-
-  return academicYear ? this.toDTO(academicYear) : null;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                Find By Name                                */
-/* -------------------------------------------------------------------------- */
-
-async findByName(name: string): Promise<AcademicYearDTO | null> {
-  const academicYear = await this.prisma.academicYear.findFirst({
-    where: {
-      name,
-      deletedAt: null,
-    },
-  });
-
-  return academicYear ? this.toDTO(academicYear) : null;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                Find By Code                                */
-/* -------------------------------------------------------------------------- */
-
-async findByCode(code: string): Promise<AcademicYearDTO | null> {
-  const academicYear = await this.prisma.academicYear.findFirst({
-    where: {
-      code,
-      deletedAt: null,
-    },
-  });
-
-  return academicYear ? this.toDTO(academicYear) : null;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                              Find Active Year                              */
-/* -------------------------------------------------------------------------- */
-
-async findActive(): Promise<AcademicYearDTO | null> {
-  const academicYear = await this.prisma.academicYear.findFirst({
-    where: {
-      status: ACADEMIC_YEAR_STATUS.ACTIVE,
-      deletedAt: null,
-    },
-  });
-
-  return academicYear ? this.toDTO(academicYear) : null;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                    Count                                   */
-/* -------------------------------------------------------------------------- */
-
-async count(): Promise<number> {
-  return this.prisma.academicYear.count({
-    where: {
-      deletedAt: null,
-    },
-  });
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                  Find All                                  */
-/* -------------------------------------------------------------------------- */
-
-async findAll(
-  options: AcademicYearQueryOptions
-): Promise<AcademicYearListResponse> {
-  const where = this.buildWhereClause(options);
-
-  const { page, limit, skip, take } = this.getPagination(options);
-
-  const sortBy =
-    options.sortBy ?? DEFAULT_QUERY_OPTIONS.SORT_BY;
-
-  const sortOrder =
-    options.sortOrder ?? DEFAULT_QUERY_OPTIONS.SORT_ORDER;
-
-  const [rows, total] = await this.prisma.$transaction([
-    this.prisma.academicYear.findMany({
-      where,
-      skip,
-      take,
-      orderBy: {
-        [sortBy]: sortOrder,
+  async delete(id: string): Promise<void> {
+    await this.prisma.academicYear.delete({
+      where: {
+        id,
       },
-    }),
+    });
+  }
 
-    this.prisma.academicYear.count({
-      where,
-    }),
-  ]);
+  /* -------------------------------------------------------------------------- */
+  /*                                Soft Delete                                 */
+  /* -------------------------------------------------------------------------- */
 
-  return {
-    data: rows.map((row) => this.toDTO(row)),
-    meta: this.buildPaginationMeta(page, limit, total),
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                   Search                                   */
-/* -------------------------------------------------------------------------- */
-
-async search(
-  query: string
-): Promise<AcademicYearDTO[]> {
-  const rows = await this.prisma.academicYear.findMany({
-    where: {
-      deletedAt: null,
-      OR: [
-        {
-          name: {
-            contains: query,
-            mode: QUERY_MODE.INSENSITIVE,
-          },
-        },
-        {
-          code: {
-            contains: query,
-            mode: QUERY_MODE.INSENSITIVE,
-          },
-        },
-        {
-          description: {
-            contains: query,
-            mode: QUERY_MODE.INSENSITIVE,
-          },
-        },
-      ],
-    },
-
-    orderBy: {
-      startDate: "desc",
-    },
-  });
-
-  return rows.map((row) => this.toDTO(row));
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                  Archive                                   */
-/* -------------------------------------------------------------------------- */
-
-async archive(
-  id: string
-): Promise<AcademicYearDTO> {
-  const academicYear =
+  async softDelete(id: string): Promise<void> {
     await this.prisma.academicYear.update({
       where: {
         id,
       },
       data: {
-        status: ACADEMIC_YEAR_STATUS.ARCHIVED,
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Restore                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async restore(id: string): Promise<AcademicYearDTO> {
+    const academicYear = await this.prisma.academicYear.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: null,
       },
     });
 
-  return this.toDTO(academicYear);
-}
+    return this.toDTO(academicYear);
+  }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Activate                                  */
-/* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                 Find By Id                                 */
+  /* -------------------------------------------------------------------------- */
 
-async activate(
-  id: string
-): Promise<AcademicYearDTO> {
-  const academicYear =
-    await this.prisma.academicYear.update({
+  async findById(
+    id: string,
+    includeDeleted = false
+  ): Promise<AcademicYearDTO | null> {
+    const where: Prisma.AcademicYearWhereInput = { id };
+
+    if (!includeDeleted) {
+      where.deletedAt = null;
+    }
+
+    const academicYear = await this.prisma.academicYear.findFirst({ where });
+
+    return academicYear ? this.toDTO(academicYear) : null;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                Find By Name                                */
+  /* -------------------------------------------------------------------------- */
+
+  async findByName(
+    name: string,
+    includeDeleted = false
+  ): Promise<AcademicYearDTO | null> {
+    const where: Prisma.AcademicYearWhereInput = { name };
+
+    if (!includeDeleted) {
+      where.deletedAt = null;
+    }
+
+    const academicYear = await this.prisma.academicYear.findFirst({ where });
+
+    return academicYear ? this.toDTO(academicYear) : null;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                Find By Code                                */
+  /* -------------------------------------------------------------------------- */
+
+  async findByCode(
+    code: string,
+    includeDeleted = false
+  ): Promise<AcademicYearDTO | null> {
+    const where: Prisma.AcademicYearWhereInput = { code };
+
+    if (!includeDeleted) {
+      where.deletedAt = null;
+    }
+
+    const academicYear = await this.prisma.academicYear.findFirst({ where });
+
+    return academicYear ? this.toDTO(academicYear) : null;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                               Find Active Year                             */
+  /* -------------------------------------------------------------------------- */
+
+  async findActive(): Promise<AcademicYearDTO | null> {
+    const academicYear = await this.prisma.academicYear.findFirst({
       where: {
-        id,
-      },
-      data: {
         status: ACADEMIC_YEAR_STATUS.ACTIVE,
+        deletedAt: null,
       },
     });
 
-  return this.toDTO(academicYear);
-}
+    return academicYear ? this.toDTO(academicYear) : null;
+  }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   Count                                    */
+  /* -------------------------------------------------------------------------- */
+
+  async count(): Promise<number> {
+    return this.prisma.academicYear.count({
+      where: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Find All                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async findAll(
+    options: AcademicYearQueryOptions
+  ): Promise<AcademicYearListResponse> {
+    const where = this.buildWhereClause(options);
+
+    const { page, limit, skip, take } = this.getPagination(options);
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.academicYear.findMany({
+        where,
+        skip,
+        take,
+      }),
+
+      this.prisma.academicYear.count({
+        where,
+      }),
+    ]);
+
+    const statusOrder = {
+      [ACADEMIC_YEAR_STATUS.UPCOMING]: 1,
+      [ACADEMIC_YEAR_STATUS.ACTIVE]: 2,
+      [ACADEMIC_YEAR_STATUS.ARCHIVED]: 3,
+    } as const;
+
+    rows.sort((a, b) => {
+      const statusCompare =
+        statusOrder[a.status] - statusOrder[b.status];
+
+      if (statusCompare !== 0) {
+        return statusCompare;
+      }
+
+      return a.sortOrder - b.sortOrder;
+    });
+
+    return {
+      data: rows.map((row) => this.toDTO(row)),
+      meta: this.buildPaginationMeta(page, limit, total),
+    };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Search                                   */
+  /* -------------------------------------------------------------------------- */
+
+  async search(
+    query: string
+  ): Promise<AcademicYearDTO[]> {
+    const rows = await this.prisma.academicYear.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: QUERY_MODE.INSENSITIVE,
+            },
+          },
+          {
+            code: {
+              contains: query,
+              mode: QUERY_MODE.INSENSITIVE,
+            },
+          },
+          {
+            description: {
+              contains: query,
+              mode: QUERY_MODE.INSENSITIVE,
+            },
+          },
+        ],
+      },
+
+      orderBy: {
+        startDate: "desc",
+      },
+    });
+
+    return rows.map((row) => this.toDTO(row));
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Archive                                   */
+  /* -------------------------------------------------------------------------- */
+
+  async archive(
+    id: string
+  ): Promise<AcademicYearDTO> {
+    const academicYear =
+      await this.prisma.academicYear.update({
+        where: {
+          id,
+        },
+        data: {
+          status: ACADEMIC_YEAR_STATUS.ARCHIVED,
+        },
+      });
+
+    return this.toDTO(academicYear);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Activate                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async activate(
+    id: string
+  ): Promise<AcademicYearDTO> {
+    const academicYear =
+      await this.prisma.academicYear.update({
+        where: {
+          id,
+        },
+        data: {
+          status: ACADEMIC_YEAR_STATUS.ACTIVE,
+        },
+      });
+
+    return this.toDTO(academicYear);
+  }
 }

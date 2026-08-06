@@ -51,25 +51,25 @@ export const navigation: readonly NavigationItem[] = [
   },
 
   {
-    id: "admissions",
-    title: "Admissions",
-    icon: Users,
-    permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
-    children: [
-      {
-        id: "new-admission",
-        title: "New Admission",
-        href: "/student-enrollments/create",
-        permission: PERMISSIONS.STUDENT_ENROLLMENTS_CREATE,
-      },
-      {
-        id: "all-admissions",
-        title: "All Admissions",
-        href: "/student-enrollments",
-        permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
-      },
-    ],
-  },
+  id: "admissions",
+  title: "Admissions",
+  icon: Users,
+  permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
+  children: [
+    {
+      id: "new-admission",
+      title: "New Admission",
+      href: "/admissions/new",
+      permission: PERMISSIONS.STUDENT_ENROLLMENTS_CREATE,
+    },
+    {
+      id: "all-admissions",
+      title: "All Admissions",
+      href: "/admissions",
+      permission: PERMISSIONS.STUDENT_ENROLLMENTS_VIEW,
+    },
+  ],
+},
 
   {
     id: "fees",
@@ -188,9 +188,25 @@ export const navigation: readonly NavigationItem[] = [
       {
         id: "academic-year",
         title: "Academic Year",
-        href: "/academic-years",
+        href: "/settings/academic-years",
         permission: PERMISSIONS.SETTINGS_VIEW,
       },
+
+      {
+        id: "classes",
+        title: "Class & Section",
+        href: "/settings/classes",
+        permission: PERMISSIONS.SETTINGS_VIEW,
+      },
+      
+
+     {
+        id: "fee-management",
+        title: "Fee Management",
+        href: "/settings/fee-management",
+        permission: PERMISSIONS.SETTINGS_VIEW,
+      },
+
       {
         id: "users",
         title: "Users",

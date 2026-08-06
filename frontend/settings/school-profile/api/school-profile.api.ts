@@ -17,6 +17,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export const schoolProfileApi = {
+  /**
+   * Fetches the active school profile including admissionPrefix.
+   */
   async getSchoolProfile(): Promise<SchoolProfile | null> {
     const response = await fetch(BASE_URL, {
       method: "GET",
@@ -36,6 +39,9 @@ export const schoolProfileApi = {
     return data.data as SchoolProfile;
   },
 
+  /**
+   * Creates the initial school profile including admissionPrefix.
+   */
   async createSchoolProfile(
     payload: CreateSchoolProfileRequest
   ): Promise<SchoolProfile> {
@@ -50,6 +56,9 @@ export const schoolProfileApi = {
     return handleResponse<SchoolProfile>(response);
   },
 
+  /**
+   * Updates the existing school profile including admissionPrefix.
+   */
   async updateSchoolProfile(
     payload: UpdateSchoolProfileRequest
   ): Promise<SchoolProfile> {

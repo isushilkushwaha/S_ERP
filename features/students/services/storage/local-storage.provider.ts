@@ -14,9 +14,7 @@ export class LocalStorageProvider implements StorageProvider {
   );
 
   async upload(
-    buffer: Buffer,
-    fileName: string,
-    mimeType: string
+buffer: Buffer, fileName: string, mimeType?: string,
   ): Promise<string> {
     await fs.mkdir(this.uploadDir, {
       recursive: true,

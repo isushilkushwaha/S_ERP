@@ -150,7 +150,7 @@ export function ReviewInformation({
       {/* Registration Note */}
       <ReviewCard title="Registration Summary">
         <div className="text-sm text-muted-foreground leading-6">
-          This step registers the student's permanent profile. Academic Year,
+          This step registers the students permanent profile. Academic Year,
           Admission Number, Class, Section, Roll Number, Transport, Hostel, and
           Enrollment Status will be assigned during the Student Admission
           process.

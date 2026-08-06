@@ -10,6 +10,10 @@ import {
 
 import { schoolProfileService } from "@/features/settings/school-profile/services/school-profile.service";
 
+/**
+ * GET /api/settings/school-profile
+ * Fetches the active school profile including admissionPrefix.
+ */
 export async function GET() {
   try {
     const profile = await schoolProfileService.get();
@@ -23,6 +27,10 @@ export async function GET() {
   }
 }
 
+/**
+ * POST /api/settings/school-profile
+ * Creates the initial school profile with admissionPrefix support.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -41,6 +49,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * PATCH /api/settings/school-profile
+ * Updates the active school profile including admissionPrefix.
+ */
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();

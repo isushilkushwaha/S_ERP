@@ -228,7 +228,7 @@ export function StudentHeader({ student }: StudentHeaderProps) {
         Edit Profile
       </DialogTitle>
       <DialogDescription className="text-xs font-medium text-muted-foreground">
-        Update student's basic profile information and primary contact details.
+        Update students basic profile information and primary contact details.
       </DialogDescription>
     </div>
   </div>

@@ -1,10 +1,11 @@
+// frontend/students/components/filters/search-input.tsx
+
 "use client";
 
 import * as React from "react";
 import { Search, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -32,9 +33,12 @@ export function SearchInput({
   const [showTooltip, setShowTooltip] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  // Derived state sync without useEffect to prevent cascading renders
+  const [prevValue, setPrevValue] = React.useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     setSearch(value);
-  }, [value]);
+  }
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -149,7 +153,6 @@ export function SearchInput({
                   Search Parameters
                 </span>
               </div>
-              
             </div>
 
             <div className="grid grid-cols-2 gap-1.5">

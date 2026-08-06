@@ -10,6 +10,7 @@ export function mapSchoolProfileToForm(
   return {
     schoolName: profile.schoolName,
     schoolCode: profile.schoolCode ?? "",
+    admissionPrefix: profile.admissionPrefix ?? "ADM",
     logoUrl: profile.logoUrl ?? "",
     faviconUrl: profile.faviconUrl ?? "",
 

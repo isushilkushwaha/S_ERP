@@ -1,3 +1,5 @@
+// hooks/use-data-table.ts
+
 "use client";
 
 import * as React from "react";
@@ -54,6 +56,7 @@ export function useDataTable<TData>({
       pageSize: initialPageSize,
     });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

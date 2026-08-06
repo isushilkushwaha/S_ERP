@@ -33,13 +33,12 @@ interface NavMainProps {
 export function NavMain({ session }: NavMainProps) {
   const pathname = usePathname();
 
-  if (!session?.user) {
-    return null;
-  }
+  // 1. 🔒 ALL HOOKS DECLARED UNCONDITIONALLY AT THE TOP
+  const permissions = React.useMemo(
+    () => session?.user?.permissions ?? [],
+    [session?.user?.permissions]
+  );
 
-  const permissions = session.user.permissions ?? [];
-
-  // Memoize permissions array & visible items to keep references stable
   const visibleItems = React.useMemo(
     () =>
       navigation.filter((item) =>
@@ -56,10 +55,7 @@ export function NavMain({ session }: NavMainProps) {
     [pathname]
   );
 
-  // Controlled state for collapsible items
   const [openItems, setOpenItems] = React.useState<Record<string, boolean>>({});
-
-  // Safely auto-expand active parent menus when route/pathname changes
   const lastPathname = React.useRef(pathname);
 
   React.useEffect(() => {
@@ -81,6 +77,11 @@ export function NavMain({ session }: NavMainProps) {
       });
     }
   }, [pathname, visibleItems, checkIsActive]);
+
+  // 2. 🛑 EARLY RETURN PLACED AFTER ALL HOOKS
+  if (!session?.user) {
+    return null;
+  }
 
   return (
     <SidebarGroup>
@@ -120,7 +121,6 @@ export function NavMain({ session }: NavMainProps) {
               return null;
             }
 
-            // Controlled open state (defaults to whether child is active on initial load)
             const isOpen = openItems[item.id] ?? isChildActive;
 
             return (

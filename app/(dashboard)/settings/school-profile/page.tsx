@@ -19,7 +19,7 @@ import {
 type SchoolProfileFormValues =
   ComponentProps<typeof SchoolProfileForm>["onSubmit"] extends (
     values: infer V,
-  ) => any
+  ) => unknown
     ? V
     : never;
 

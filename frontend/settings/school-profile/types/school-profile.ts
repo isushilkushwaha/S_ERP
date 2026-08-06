@@ -1,4 +1,5 @@
 export interface SchoolProfile {
+  admissionPrefix: string;
   id: string;
 
   // Basic Information

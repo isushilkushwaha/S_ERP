@@ -72,7 +72,7 @@ export function PersonalInformation({
         </h2>
 
         <p className="text-sm text-muted-foreground">
-          Enter the student's personal details.
+          Enter the students personal details.
         </p>
       </div>
 

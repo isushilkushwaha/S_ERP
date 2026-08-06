@@ -7,6 +7,474 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==========================================
+// AUTHENTICATION & ACCESS CONTROL
+// ==========================================
+
+model Role {
+  id              String           @id @default(cuid())
+  name            RoleName         @unique
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  rolePermissions RolePermission[]
+  users           User[]
+
+  @@map("roles")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  fullName     String     @map("full_name")
+  email        String     @unique
+  username     String     @unique
+  passwordHash String     @map("password_hash")
+  roleId       String     @map("role_id")
+  isActive     Boolean    @default(true) @map("is_active")
+  lastLoginAt  DateTime?  @map("last_login_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+  adminType    AdminType? @map("admin_type")
+  accounts     Account[]
+  sessions     Session[]
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@index([email])
+  @@index([username])
+  @@index([roleId])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Permission {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  description     String?
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ==========================================
+// INSTITUTION PROFILE
+// ==========================================
+
+model SchoolProfile {
+  id                String    @id @default(uuid()) @db.Uuid
+  schoolName        String    @map("school_name") @db.VarChar(150)
+  schoolCode        String?   @unique @map("school_code") @db.VarChar(30)
+  admissionPrefix   String    @default("ADM") @map("admission_prefix") @db.VarChar(20) // ADDED: Dynamic Prefix
+  logoUrl           String?   @map("logo_url")
+  email             String?   @db.VarChar(150)
+  phone             String?   @db.VarChar(20)
+  alternatePhone    String?   @map("alternate_phone") @db.VarChar(20)
+  website           String?   @db.VarChar(255)
+  addressLine1      String    @map("address_line_1") @db.VarChar(255)
+  addressLine2      String?   @map("address_line_2") @db.VarChar(255)
+  city              String    @db.VarChar(100)
+  district          String?   @db.VarChar(100)
+  state             String    @db.VarChar(100)
+  country           String    @default("India") @db.VarChar(100)
+  postalCode        String?   @map("postal_code") @db.VarChar(10)
+  board             String?   @db.VarChar(100)
+  affiliationNumber String?   @map("affiliation_number") @db.VarChar(100)
+  principalName     String?   @map("principal_name") @db.VarChar(150)
+  timezone          String    @default("Asia/Kolkata")
+  currency          String    @default("INR")
+  isActive          Boolean   @default(true) @map("is_active")
+  faviconUrl        String?   @map("favicon_url")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+
+  @@map("school_profiles")
+}
+
+// ==========================================
+// ACADEMIC STRUCTURE & COUNTERS
+// ==========================================
+
+model AcademicYear {
+  id          String             @id @default(cuid())
+  name        String
+  code        String             @unique
+  startDate   DateTime           @map("start_date")
+  endDate     DateTime           @map("end_date")
+  status      AcademicYearStatus @default(UPCOMING)
+  description String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  deletedAt   DateTime?          @map("deleted_at")
+  sortOrder   Int                @default(0) @map("sort_order")
+
+  studentEnrollments StudentEnrollment[]
+  feeStructures      FeeStructure[]
+
+  admissionCounter   AcademicYearCounter?
+  rollNumberCounters RollNumberCounter[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("academic_years")
+}
+
+model AcademicYearCounter {
+  id                    String   @id @default(uuid())
+  academicYearId        String   @unique @map("academic_year_id")
+  lastAdmissionSequence Int      @default(0) @map("last_admission_sequence")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@map("academic_year_counters")
+}
+
+model RollNumberCounter {
+  id             String   @id @default(uuid())
+  academicYearId String   @map("academic_year_id")
+  classId        String   @map("class_id")
+  sectionId      String   @map("section_id") // Strict non-null section relation
+  lastRollNumber Int      @default(0) @map("last_roll_number")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  section      Section      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([academicYearId, classId, sectionId], name: "unique_roll_counter_scope")
+  @@index([academicYearId, classId, sectionId])
+  @@map("roll_number_counters")
+}
+
+model Class {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  name         String    @db.VarChar(50)
+  shortName    String?   @map("short_name") @db.VarChar(20)
+  code         String    @db.VarChar(20)
+  description  String?   @db.VarChar(255)
+  medium       Medium    @default(ENGLISH)
+  displayOrder Int       @map("display_order")
+  status       Status    @default(ACTIVE)
+  version      Int       @default(1)
+  createdBy    String?   @map("created_by")
+  updatedBy    String?   @map("updated_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  enrollments        StudentEnrollment[]
+  configuration      ClassConfiguration?
+  sections           Section[]
+  feeStructures      FeeStructure[]
+  rollNumberCounters RollNumberCounter[]
+
+  @@unique([tenantId, name, deletedAt], name: "unique_tenant_class_name")
+  @@unique([tenantId, code, deletedAt], name: "unique_tenant_class_code")
+  @@unique([tenantId, displayOrder, deletedAt], name: "unique_tenant_class_display_order")
+  @@index([tenantId, status, displayOrder])
+  @@map("classes")
+}
+
+model ClassConfiguration {
+  id                        String   @id @default(uuid())
+  classId                   String   @unique @map("class_id")
+  sectionsEnabled           Boolean  @default(true) @map("sections_enabled")
+  defaultSectionCapacity    Int?     @map("default_section_capacity")
+  maxStudentsWithoutSection Int?     @map("max_students_without_section")
+  autoAllocationEnabled     Boolean  @default(true) @map("auto_allocation_enabled")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+  class                     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@map("class_configurations")
+}
+
+model Section {
+  id           String    @id @default(uuid())
+  classId      String    @map("class_id")
+  name         String    @db.VarChar(20)
+  displayOrder Int       @map("display_order")
+  capacity     Int
+  status       Status    @default(ACTIVE)
+  version      Int       @default(1)
+  createdBy    String?   @map("created_by")
+  updatedBy    String?   @map("updated_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  enrollments        StudentEnrollment[]
+  class              Class               @relation(fields: [classId], references: [id], onDelete: Cascade)
+  rollNumberCounters RollNumberCounter[]
+
+  @@unique([classId, name, deletedAt], name: "unique_class_section_name")
+  @@unique([classId, displayOrder, deletedAt], name: "unique_class_section_display_order")
+  @@index([classId, status, displayOrder])
+  @@map("sections")
+}
+
+// ==========================================
+// STUDENT & ENROLLMENT MANAGEMENT
+// ==========================================
+
+model Student {
+  id                 String           @id @default(uuid())
+  studentCode        String           @unique @map("student_code") // Permanent Lifecycle ID
+  emisNumber         String?          @map("emis_number")
+  apaarId            String?          @map("apaar_id")
+  penNumber          String?          @map("pen_number")
+  firstName          String           @map("first_name")
+  middleName         String?          @map("middle_name")
+  lastName           String           @map("last_name")
+  gender             Gender
+  dateOfBirth        DateTime         @map("date_of_birth")
+  bloodGroup         String?          @map("blood_group")
+  religion           String?
+  category           StudentCategory?
+  caste              String?
+  nationality        String?          @default("Indian")
+  aadhaarNumber      String?          @unique @map("aadhaar_number")
+  birthCertificateNo String?          @map("birth_certificate_no")
+  email              String?
+  mobile             String?
+  photo              String?
+  previousSchool     String?          @map("previous_school")
+  remarks            String?
+  fatherName         String           @map("father_name")
+  fatherOccupation   String?          @map("father_occupation")
+  fatherMobile       String           @map("father_mobile")
+  fatherEmail        String?          @map("father_email")
+  motherName         String?          @map("mother_name")
+  motherOccupation   String?          @map("mother_occupation")
+  motherMobile       String?          @map("mother_mobile")
+  motherEmail        String?          @map("mother_email")
+  guardianName       String?          @map("guardian_name")
+  guardianRelation   String?          @map("guardian_relation")
+  guardianMobile     String?          @map("guardian_mobile")
+  guardianEmail      String?          @map("guardian_email")
+  addressLine1       String           @map("address_line_1")
+  addressLine2       String?          @map("address_line_2")
+  city               String
+  district           String
+  state              String
+  country            String           @default("India")
+  postalCode         String           @map("postal_code")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  deletedAt          DateTime?        @map("deleted_at")
+  registrationDate   DateTime         @default(now()) @map("registration_date")
+
+  documents   StudentDocument[]
+  enrollments StudentEnrollment[]
+
+  @@index([studentCode])
+  @@index([aadhaarNumber])
+  @@map("students")
+}
+
+model StudentEnrollment {
+  id                      String        @id @default(uuid())
+  studentId               String        @map("student_id")
+  academicYearId          String        @map("academic_year_id")
+  classId                 String        @map("class_id")
+  sectionId               String        @map("section_id") // Required relation for 100% DB constraint guarantee
+  admissionNumber         String        @map("admission_number")
+  rollNumber              Int           @map("roll_number")
+  medium                  Medium        @default(ENGLISH)
+  stream                  Stream?
+  house                   String?
+  boardRegistrationNumber String?       @map("board_registration_number")
+  admissionType           AdmissionType @map("admission_type")
+  admissionDate           DateTime      @map("admission_date")
+  isHostelRequired        Boolean       @default(false) @map("is_hostel_required")
+  isTransportRequired     Boolean       @default(false) @map("is_transport_required")
+  status                  EnrollmentStatus @default(ACTIVE)
+  remarks                 String?
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
+
+  academicYear AcademicYear       @relation(fields: [academicYearId], references: [id])
+  class        Class              @relation(fields: [classId], references: [id])
+  section      Section            @relation(fields: [sectionId], references: [id])
+  student      Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeLedgers   StudentFeeLedger[]
+
+  @@unique([studentId, academicYearId], name: "unique_student_academic_year")
+  @@unique([admissionNumber], name: "unique_admission_number")
+  @@unique([academicYearId, classId, sectionId, rollNumber], name: "unique_academic_class_section_roll")
+  @@index([studentId])
+  @@index([academicYearId])
+  @@index([classId])
+  @@index([sectionId])
+  @@index([status])
+  @@map("student_enrollments")
+}
+
+model StudentDocument {
+  id             String       @id @default(uuid())
+  studentId      String       @map("student_id")
+  documentType   DocumentType @map("document_type")
+  documentNumber String?      @map("document_number")
+  fileName       String       @map("file_name")
+  fileUrl        String       @map("file_url")
+  mimeType       String?      @map("mime_type")
+  fileSize       Int?         @map("file_size")
+  issueDate      DateTime?    @map("issue_date")
+  expiryDate     DateTime?    @map("expiry_date")
+  verified       Boolean      @default(false)
+  remarks        String?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("student_documents")
+}
+
+// ==========================================
+// FEES & FINANCIAL LEDGERS
+// ==========================================
+
+model FeeStructure {
+  id             String             @id @default(uuid())
+  tenantId       String             @map("tenant_id")
+  academicYearId String             @map("academic_year_id")
+  classId        String             @map("class_id")
+  effectiveFrom  DateTime           @map("effective_from")
+  status         FeeStructureStatus @default(ACTIVE)
+  notes          String?            @db.VarChar(500)
+  version        Int                @default(1)
+  createdBy      String?            @map("created_by")
+  updatedBy      String?            @map("updated_by")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+  deletedAt      DateTime?          @map("deleted_at")
+
+  academicYear AcademicYear       @relation(fields: [academicYearId], references: [id])
+  class        Class              @relation(fields: [classId], references: [id])
+  items        FeeStructureItem[]
+
+  @@unique([tenantId, academicYearId, classId, deletedAt], name: "unique_fee_structure")
+  @@index([tenantId])
+  @@index([academicYearId])
+  @@index([classId])
+  @@map("fee_structures")
+}
+
+model FeeStructureItem {
+  id             String   @id @default(uuid())
+  feeStructureId String   @map("fee_structure_id")
+  feeComponentId String   @map("fee_component_id")
+  amount         Decimal  @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  feeStructure FeeStructure @relation(fields: [feeStructureId], references: [id], onDelete: Cascade)
+  feeComponent FeeComponent @relation(fields: [feeComponentId], references: [id])
+
+  @@unique([feeStructureId, feeComponentId], name: "unique_fee_structure_component")
+  @@index([feeStructureId])
+  @@index([feeComponentId])
+  @@map("fee_structure_items")
+}
+
+model FeeComponent {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  name         String    @db.VarChar(100)
+  code         String    @db.VarChar(30)
+  description  String?   @db.VarChar(255)
+  isRequired   Boolean   @default(true) @map("is_required")
+  displayOrder Int       @default(0) @map("display_order")
+  status       Status    @default(ACTIVE)
+  version      Int       @default(1)
+  createdBy    String?   @map("created_by")
+  updatedBy    String?   @map("updated_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  feeStructureItems FeeStructureItem[]
+  feeLedgers        StudentFeeLedger[]
+
+  @@unique([tenantId, code, deletedAt], name: "unique_tenant_fee_component_code")
+  @@unique([tenantId, name, deletedAt], name: "unique_tenant_fee_component_name")
+  @@index([tenantId, status])
+  @@map("fee_components")
+}
+
+model StudentFeeLedger {
+  id             String    @id @default(uuid())
+  enrollmentId   String    @map("enrollment_id")
+  feeComponentId String    @map("fee_component_id")
+  amount         Decimal   @db.Decimal(10, 2)
+  dueDate        DateTime? @map("due_date")
+  isPaid         Boolean   @default(false) @map("is_paid")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  enrollment   StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  feeComponent FeeComponent      @relation(fields: [feeComponentId], references: [id])
+
+  @@index([enrollmentId])
+  @@index([isPaid])
+  @@map("student_fee_ledgers")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
 enum RoleName {
   ADMIN
   TEACHER
@@ -16,94 +484,6 @@ enum AdminType {
   PRIMARY
   SECONDARY
 }
-
-model Role {
-  id              String           @id @default(cuid())
-  name            RoleName         @unique
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  rolePermissions RolePermission[]
-  users           User[]
-}
-
-model User {
-  id           String     @id @default(uuid())
-  fullName     String
-  email        String     @unique
-  username     String     @unique
-  passwordHash String
-  roleId       String
-  adminType    AdminType?
-  isActive     Boolean    @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  deletedAt    DateTime?
-  accounts     Account[]
-  sessions     Session[]
-  role         Role       @relation(fields: [roleId], references: [id])
-
-  @@index([email])
-  @@index([username])
-  @@index([roleId])
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@id([identifier, token])
-}
-
-model Permission {
-  id              String           @id @default(cuid())
-  name            String           @unique
-  description     String?
-  rolePermissions RolePermission[]
-}
-
-model RolePermission {
-  roleId       String
-  permissionId String
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-}
-
-// ==============================
-// ENUMS
-// ==============================
 
 enum Gender {
   MALE
@@ -126,12 +506,6 @@ enum StudentStatus {
   INACTIVE
   ALUMNI
   TRANSFERRED
-}
-
-enum Medium {
-  ENGLISH
-  HINDI
-  BOTH
 }
 
 enum AdmissionType {
@@ -166,284 +540,25 @@ enum DocumentType {
   OTHER
 }
 
-model Class {
-  id           String  @id @default(uuid())
-  name         String
-  numericOrder Int
-  medium       Medium  @default(ENGLISH)
-  description  String?
-
-  sections    Section[]
-  enrollments StudentEnrollment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([name])
-  @@index([numericOrder])
-}
-
-model Section {
-  id String @id @default(uuid())
-
-  classId String
-  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
-
-  name String
-
-  classTeacherId String?
-  roomNumber     String?
-  capacity       Int?
-
-  isActive Boolean @default(true)
-
-  enrollments StudentEnrollment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([classId, name])
-}
-
-model Student {
-  id String @id @default(uuid())
-
-  studentCode String @unique
-
-  emisNumber String?
-  apaarId    String?
-  penNumber  String?
-
-  firstName  String
-  middleName String?
-  lastName   String
-
-  gender      Gender
-  dateOfBirth DateTime
-
-  bloodGroup  String?
-  religion    String?
-  category    StudentCategory?
-  caste       String?
-  nationality String?
-
-  aadhaarNumber      String? @unique
-  birthCertificateNo String?
-
-  email  String?
-  mobile String?
-
-  photo String?
-
-  registrationDate DateTime @default(now())
-  previousSchool   String?
-
-  remarks String?
-
-  fatherName       String
-  fatherOccupation String?
-  fatherMobile     String
-  fatherEmail      String?
-
-  motherName       String?
-  motherOccupation String?
-  motherMobile     String?
-  motherEmail      String?
-
-  guardianName     String?
-  guardianRelation String?
-  guardianMobile   String?
-  guardianEmail    String?
-
-  addressLine1 String
-  addressLine2 String?
-
-  city       String
-  district   String
-  state      String
-  country    String @default("India")
-  postalCode String
-
-  enrollments StudentEnrollment[]
-  documents   StudentDocument[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@index([studentCode])
-  @@index([aadhaarNumber])
-}
-
-model StudentEnrollment {
-  id String @id @default(uuid())
-
-  // Student
-  studentId String
-  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  // Academic Session
-  academicYearId String
-  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
-
-  // Class Assignment
-  classId String
-  class   Class  @relation(fields: [classId], references: [id])
-
-  sectionId String
-  section   Section @relation(fields: [sectionId], references: [id])
-
-  // Admission
-  admissionNumber String
-  admissionDate   DateTime
-  admissionType   AdmissionType
-
-  // Academic
-  rollNumber Int
-  medium     Medium
-  stream     Stream?
-
-  // Optional
-  house                   String?
-  boardRegistrationNumber String?
-
-  // Facilities
-  isTransportRequired Boolean @default(false)
-  isHostelRequired    Boolean @default(false)
-
-  // Current Student Status
-  status StudentStatus @default(ACTIVE)
-
-  remarks String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([studentId, academicYearId])
-  @@unique([academicYearId, admissionNumber])
-  @@unique([academicYearId, classId, sectionId, rollNumber])
-  @@index([studentId])
-  @@index([academicYearId])
-  @@index([classId])
-  @@index([sectionId])
-  @@index([status])
-}
-
-model StudentDocument {
-  id String @id @default(uuid())
-
-  studentId String
-  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  documentType DocumentType
-
-  documentNumber String?
-
-  fileName String
-  fileUrl  String
-
-  mimeType String?
-  fileSize Int?
-
-  issueDate  DateTime?
-  expiryDate DateTime?
-
-  verified Boolean @default(false)
-
-  remarks String?
-
-  createdAt DateTime @default(now())
-}
-
-// -------------------------------------------------------SchoolProfile-----------------------------------------------------------
-
-model SchoolProfile {
-  id String @id @default(uuid()) @db.Uuid
-
-  // Basic Information
-  schoolName String  @db.VarChar(150)
-  schoolCode String? @unique @db.VarChar(30)
-
-  // Branding
-  logoUrl    String? @db.Text
-  faviconUrl String?
-
-  // Contact Information
-  email          String? @db.VarChar(150)
-  phone          String? @db.VarChar(20)
-  alternatePhone String? @db.VarChar(20)
-  website        String? @db.VarChar(255)
-
-  // Address
-  addressLine1 String  @db.VarChar(255)
-  addressLine2 String? @db.VarChar(255)
-  city         String  @db.VarChar(100)
-  district     String? @db.VarChar(100)
-  state        String  @db.VarChar(100)
-  country      String  @default("India") @db.VarChar(100)
-  postalCode   String? @db.VarChar(10)
-
-  // Academic Information
-  board             String? @db.VarChar(100)
-  affiliationNumber String? @db.VarChar(100)
-  principalName     String? @db.VarChar(150)
-
-  // Localization
-  timezone String @default("Asia/Kolkata")
-  currency String @default("INR")
-
-  // Status
-  isActive Boolean @default(true)
-
-  // Audit
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Soft Delete
-  deletedAt DateTime?
-
-  @@map("school_profiles")
-}
-
-//------------------------------------------------AcademicYear-------------------------------------------------------------------
-
 enum AcademicYearStatus {
   UPCOMING
   ACTIVE
   ARCHIVED
 }
 
-model AcademicYear {
-  id String @id @default(cuid())
+enum Status {
+  ACTIVE
+  INACTIVE
+}
 
-  /// Display Name (Example: 2026-27)
-  name String @unique
+enum Medium {
+  ENGLISH
+  HINDI
+  BOTH
+}
 
-  /// Unique Code (Example: AY202627)
-  code String @unique
-
-  /// Academic Session Duration
-  startDate DateTime
-  endDate   DateTime
-
-  /// Session Status
-  status AcademicYearStatus @default(UPCOMING)
-
-  /// Optional Notes
-  description String?
-
-  /// Used for sorting
-  sortOrder Int @default(0)
-
-  /// Audit Fields
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  /// Relations
-  studentEnrollments StudentEnrollment[]
-
-  @@index([status])
-  @@index([deletedAt])
-  
+enum FeeStructureStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
 }

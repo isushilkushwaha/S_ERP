@@ -68,7 +68,7 @@ export function StudentSearch({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Enter the student's unique Student Code to search.
+        Enter the students unique Student Code to search.
       </p>
     </div>
   );

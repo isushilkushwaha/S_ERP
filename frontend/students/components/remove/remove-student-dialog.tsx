@@ -131,7 +131,7 @@ export function RemoveStudentDialog({
                 <p className="text-xs text-muted-foreground">
                   No active student account matches code{" "}
                   <span className="font-mono font-bold text-foreground">
-                    "{searchCode}"
+                    {searchCode}
                   </span>
                   . Please verify the code and try again.
                 </p>

@@ -1,7 +1,10 @@
+// frontend/shared/components/image-upload/image-preview.tsx
+
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, ImageOff, ImageIcon } from "lucide-react";
+import { useState } from "react";
+import Image from "next/image";
+import { AlertCircle, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImagePreviewProps {
@@ -25,6 +28,13 @@ const sizeClasses = {
   avatar: "h-28 w-28 rounded-full",
 };
 
+const dimensionMap = {
+  sm: 112,
+  md: 144,
+  lg: 192,
+  avatar: 112,
+};
+
 export function ImagePreview({
   src,
   alt = "Image Preview",
@@ -32,13 +42,16 @@ export function ImagePreview({
   size = "md",
 }: ImagePreviewProps) {
   const [imageError, setImageError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
 
-  // Reset error status if the src prop changes
-  useEffect(() => {
+  // Derived state sync without useEffect
+  if (src !== currentSrc) {
+    setCurrentSrc(src);
     setImageError(false);
-  }, [src]);
+  }
 
   const hasImage = Boolean(src) && !imageError;
+  const dimension = dimensionMap[size];
 
   return (
     <div
@@ -48,13 +61,17 @@ export function ImagePreview({
         className
       )}
     >
-      {hasImage ? (
-        <img
-          src={src}
-          alt={alt}
-          className="h-full w-full object-contain p-2 transition-transform duration-300 hover:scale-105"
-          onError={() => setImageError(true)}
-        />
+      {hasImage && src ? (
+        <div className="relative w-full h-full">
+          <Image
+            src={src}
+            alt={alt}
+            width={dimension}
+            height={dimension}
+            className="h-full w-full object-contain p-2 transition-transform duration-300 hover:scale-105"
+            onError={() => setImageError(true)}
+          />
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-1.5 p-3 text-center text-muted-foreground">
           {imageError ? (

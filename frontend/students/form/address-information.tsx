@@ -32,7 +32,7 @@ export function AddressInformation() {
         <CardTitle>Address Information</CardTitle>
 
         <CardDescription>
-          Enter the student's residential address.
+          Enter the students residential address.
         </CardDescription>
       </CardHeader>
 

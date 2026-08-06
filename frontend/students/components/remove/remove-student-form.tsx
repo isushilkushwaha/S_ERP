@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Trash2, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";

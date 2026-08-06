@@ -1,3 +1,5 @@
+// frontend/students/components/update/personal-form.tsx
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -15,7 +17,6 @@ import {
   AlertCircle,
   Save,
   Tag,
-  Hash,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,10 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
       remarks: student.remarks ?? "",
     },
   });
+
+  const genderValue = form.watch("gender");
+  const bloodGroupValue = form.watch("bloodGroup");
+  const categoryValue = form.watch("category");
 
   const onSubmit = (values: PersonalFormValues) => {
     const payload: UpdatePersonalRequest = {
@@ -151,7 +156,7 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
             </Label>
             <Select
               disabled={mutation.isPending}
-              value={form.watch("gender")}
+              value={genderValue}
               onValueChange={(value) =>
                 form.setValue("gender", value as PersonalFormValues["gender"], {
                   shouldValidate: true,
@@ -193,7 +198,7 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
             </Label>
             <Select
               disabled={mutation.isPending}
-              value={form.watch("bloodGroup")}
+              value={bloodGroupValue}
               onValueChange={(value) =>
                 form.setValue(
                   "bloodGroup",
@@ -267,7 +272,7 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
             </Label>
             <Select
               disabled={mutation.isPending}
-              value={form.watch("category")}
+              value={categoryValue}
               onValueChange={(value) =>
                 form.setValue(
                   "category",
@@ -377,12 +382,11 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
               Aadhaar Number
             </Label>
             <div className="relative">
-              
               <Input
                 id="aadhaarNumber"
                 placeholder="12-digit Aadhaar Number"
                 disabled={mutation.isPending}
-                className={`pl-9 font-mono border-border/80 bg-background font-medium focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`pl-3 font-mono border-border/80 bg-background font-medium focus-visible:ring-2 focus-visible:ring-primary ${
                   form.formState.errors.aadhaarNumber ? "border-destructive" : ""
                 }`}
                 {...form.register("aadhaarNumber")}
@@ -405,12 +409,11 @@ export function PersonalForm({ student, onCancel }: PersonalFormProps) {
               Birth Certificate Number
             </Label>
             <div className="relative">
-              
               <Input
                 id="birthCertificateNo"
                 placeholder="Birth Certificate Reg. No."
                 disabled={mutation.isPending}
-                className={`pl-9 font-mono border-border/80 bg-background font-medium focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`pl-3 font-mono border-border/80 bg-background font-medium focus-visible:ring-2 focus-visible:ring-primary ${
                   form.formState.errors.birthCertificateNo
                     ? "border-destructive"
                     : ""

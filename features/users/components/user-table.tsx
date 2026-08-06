@@ -1,4 +1,4 @@
-
+// features/users/components/user-table.tsx
 
 "use client";
 
@@ -18,6 +18,7 @@ interface UserTableProps {
 export function UserTable({
   data,
 }: UserTableProps) {
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export class SchoolProfileRepository {
   /**
-   * Returns the active school profile.
+   * Returns the active school profile including admissionPrefix.
    */
   async findProfile(): Promise<SchoolProfile | null> {
     return prisma.schoolProfile.findFirst({
@@ -15,7 +15,7 @@ export class SchoolProfileRepository {
   }
 
   /**
-   * Returns a school profile by id.
+   * Returns a school profile by id including admissionPrefix.
    */
   async findById(id: string): Promise<SchoolProfile | null> {
     return prisma.schoolProfile.findFirst({
@@ -36,7 +36,7 @@ export class SchoolProfileRepository {
   }
 
   /**
-   * Creates a new school profile.
+   * Creates a new school profile with admissionPrefix support.
    */
   async create(
     data: Prisma.SchoolProfileCreateInput,
@@ -47,7 +47,7 @@ export class SchoolProfileRepository {
   }
 
   /**
-   * Updates an existing school profile.
+   * Updates an existing school profile including admissionPrefix updates.
    */
   async update(
     id: string,

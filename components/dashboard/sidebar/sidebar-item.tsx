@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { type LucideIcon } from "lucide-react";
 
 import { useSidebar } from "../hooks/use-sidebar";
 import type { NavigationItem } from "../navigation/navigation-types";
@@ -15,19 +16,19 @@ interface Props {
 export function SidebarItem({
   item,
 }: Props) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
+  const { collapsed, closeMobile } = useSidebar();
 
-  const { collapsed , closeMobile} = useSidebar();
+  const itemHref = item.href ?? "#";
+  const active = pathname.startsWith(itemHref);
 
-  const active =
-    pathname.startsWith(item.href);
-
-  const Icon = item.icon;
+  // Safely cast LucideIcon to element type to satisfy JSX checks
+  const Icon = item.icon as LucideIcon | undefined;
 
   return (
     <SidebarTooltip label={item.title}>
       <Link
-        href={item.href}
+        href={itemHref}
         onClick={closeMobile}
         className={`
           flex
@@ -50,13 +51,11 @@ export function SidebarItem({
           }
         `}
       >
-
-        <Icon className="h-5 w-5 shrink-0" />
+        {Icon && <Icon className="h-5 w-5 shrink-0" />}
 
         {!collapsed && (
           <span>{item.title}</span>
         )}
-
       </Link>
     </SidebarTooltip>
   );

@@ -1,13 +1,13 @@
 import { AcademicYear, AcademicYearStatus } from "@prisma/client";
 
 /* -------------------------------------------------------------------------- */
-/*                               Core Entity                                  */
+/*                                Core Entity                                 */
 /* -------------------------------------------------------------------------- */
 
 export type AcademicYearEntity = AcademicYear;
 
 /* -------------------------------------------------------------------------- */
-/*                                   DTOs                                     */
+/*                                    DTOs                                    */
 /* -------------------------------------------------------------------------- */
 
 export interface AcademicYearDTO {
@@ -59,7 +59,7 @@ export interface UpdateAcademicYearDTO {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                            Repository Inputs                               */
+/*                            Repository Inputs                                */
 /* -------------------------------------------------------------------------- */
 
 export interface AcademicYearRepositoryCreateInput {
@@ -130,9 +130,7 @@ export interface PaginationOptions {
   sortOrder?: SortOrder;
 }
 
-export interface AcademicYearQueryOptions
-  extends PaginationOptions,
-    AcademicYearFilters {}
+export type AcademicYearQueryOptions = PaginationOptions & AcademicYearFilters;
 
 /* -------------------------------------------------------------------------- */
 /*                              API Responses                                 */
@@ -163,7 +161,7 @@ export interface SearchResponse<T> {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                           Repository Responses                             */
+/*                          Repository Responses                              */
 /* -------------------------------------------------------------------------- */
 
 export interface AcademicYearListResponse {
@@ -173,7 +171,7 @@ export interface AcademicYearListResponse {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                            Service Return Types                            */
+/*                           Service Return Types                             */
 /* -------------------------------------------------------------------------- */
 
 export interface AcademicYearOperationResult {
@@ -191,7 +189,7 @@ export interface AcademicYearDeleteResult {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                          Active Academic Year                              */
+/*                         Active Academic Year                               */
 /* -------------------------------------------------------------------------- */
 
 export interface ActiveAcademicYearResponse {
@@ -202,11 +200,10 @@ export interface ActiveAcademicYearResponse {
 /*                              Search Result                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface AcademicYearSearchResult
-  extends SearchResponse<AcademicYearDTO> {}
+export type AcademicYearSearchResult = SearchResponse<AcademicYearDTO>;
 
 /* -------------------------------------------------------------------------- */
-/*                          Archive / Activate DTO                            */
+/*                         Archive / Activate DTO                             */
 /* -------------------------------------------------------------------------- */
 
 export interface ArchiveAcademicYearDTO {
@@ -218,7 +215,7 @@ export interface ActivateAcademicYearDTO {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                           Soft Delete DTO                                  */
+/*                            Soft Delete DTO                                 */
 /* -------------------------------------------------------------------------- */
 
 export interface SoftDeleteAcademicYearDTO {

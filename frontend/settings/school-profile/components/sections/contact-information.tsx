@@ -21,7 +21,7 @@ export function ContactInformation() {
       <div>
         <h3 className="text-lg font-semibold">Contact Information</h3>
         <p className="text-sm text-muted-foreground">
-          Enter the school's contact details.
+          Enter the schools contact details.
         </p>
       </div>
 

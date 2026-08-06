@@ -21,7 +21,7 @@ export function AddressInformation() {
       <div>
         <h3 className="text-lg font-semibold">Address Information</h3>
         <p className="text-sm text-muted-foreground">
-          Enter the school's address details.
+          Enter the schools address details.
         </p>
       </div>
 

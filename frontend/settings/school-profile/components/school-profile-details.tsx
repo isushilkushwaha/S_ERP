@@ -7,6 +7,7 @@ import {
   Coins,
   Edit2,
   Globe,
+  Hash,
   Mail,
   MapPin,
   Phone,
@@ -16,7 +17,6 @@ import {
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -108,22 +108,22 @@ export function SchoolProfileDetails({
                 </div>
               </div>
 
-              {/* Fixed Tooltip with Pencil Icon */}
+              {/* Edit Profile Button */}
               <div className="absolute top-6 right-6 sm:relative sm:top-0 sm:right-0">
                 <Tooltip>
-  <TooltipTrigger
-    type="button"
-    onClick={handleEditClick}
-    className="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-primary/10"
-  >
-    <Edit2 className="h-5 w-5" />
-    <span className="sr-only">Edit Profile</span>
-  </TooltipTrigger>
+                  <TooltipTrigger
+                    type="button"
+                    onClick={handleEditClick}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-primary/10"
+                  >
+                    <Edit2 className="h-5 w-5" />
+                    <span className="sr-only">Edit Profile</span>
+                  </TooltipTrigger>
 
-  <TooltipContent side="left">
-    <p>Edit Profile Details</p>
-  </TooltipContent>
-</Tooltip>
+                  <TooltipContent side="left">
+                    <p>Edit Profile Details</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </CardContent>
@@ -143,6 +143,15 @@ export function SchoolProfileDetails({
             <Separator />
             <CardContent className="p-0">
               <div className="divide-y divide-border/60">
+                <DetailRow
+                  icon={<Hash className="h-4 w-4" />}
+                  label="Admission Prefix"
+                  value={
+                    <code className="rounded bg-primary/10 px-2 py-0.5 font-mono text-xs font-bold text-primary border border-primary/20">
+                      {profile.admissionPrefix || "ADM"}
+                    </code>
+                  }
+                />
                 <DetailRow
                   icon={<Award className="h-4 w-4" />}
                   label="Affiliation Number"
@@ -226,8 +235,8 @@ export function SchoolProfileDetails({
               </div>
             </CardHeader>
             <Separator />
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
+            <CardContent className="p-0">
+              <div className="p-6 flex items-start gap-4">
                 <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted border border-border/50">
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
@@ -257,7 +266,7 @@ export function SchoolProfileDetails({
 
 interface DetailRowProps {
   label: string;
-  value: string;
+  value: React.ReactNode;
   icon: React.ReactNode;
   href?: string;
   isExternal?: boolean;
@@ -276,7 +285,7 @@ function DetailRow({ label, value, icon, href, isExternal }: DetailRowProps) {
           <p className="text-sm font-medium text-muted-foreground sm:w-48 shrink-0 truncate">
             {label}
           </p>
-          <p
+          <div
             className={`text-sm font-semibold truncate ${
               isNoValue
                 ? "text-muted-foreground/70"
@@ -286,7 +295,7 @@ function DetailRow({ label, value, icon, href, isExternal }: DetailRowProps) {
             }`}
           >
             {value}
-          </p>
+          </div>
         </div>
       </div>
 

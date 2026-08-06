@@ -1,7 +1,4 @@
-/**
- * Permission constants for the School ERP.
- * Format: <resource>.<action>
- */
+
 
 export const PERMISSIONS = {
   // Dashboard
@@ -12,6 +9,7 @@ export const PERMISSIONS = {
   STUDENTS_CREATE: "students.create",
   STUDENTS_UPDATE: "students.update",
   STUDENTS_DELETE: "students.delete",
+
   // Student Enrollments
   STUDENT_ENROLLMENTS_VIEW: "student-enrollments.view",
   STUDENT_ENROLLMENTS_CREATE: "student-enrollments.create",
@@ -55,20 +53,42 @@ export const PERMISSIONS = {
   PROFILE_VIEW: "profile.view",
   PROFILE_UPDATE: "profile.update",
 
-  // Settings
-  // Settings
-SETTINGS_VIEW: "settings.view",
-SETTINGS_MANAGE: "settings.manage",
+  // Settings Master
+  SETTINGS_VIEW: "settings.view",
+  SETTINGS_MANAGE: "settings.manage",
 
-// Academic Years
-ACADEMIC_YEARS_VIEW: "academic-years.view",
-ACADEMIC_YEARS_CREATE: "academic-years.create",
-ACADEMIC_YEARS_UPDATE: "academic-years.update",
-ACADEMIC_YEARS_DELETE: "academic-years.delete",
-ACADEMIC_YEARS_RESTORE: "academic-years.restore",
-ACADEMIC_YEARS_ACTIVATE: "academic-years.activate",
-ACADEMIC_YEARS_ARCHIVE: "academic-years.archive",
+  // Academic Years
+  ACADEMIC_YEARS_VIEW: "academic-years.view",
+  ACADEMIC_YEARS_CREATE: "academic-years.create",
+  ACADEMIC_YEARS_UPDATE: "academic-years.update",
+  ACADEMIC_YEARS_DELETE: "academic-years.delete",
+  ACADEMIC_YEARS_RESTORE: "academic-years.restore",
+  ACADEMIC_YEARS_ACTIVATE: "academic-years.activate",
+  ACADEMIC_YEARS_ARCHIVE: "academic-years.archive",
+
+  // Classes (Master Module)
+  CLASSES_VIEW: "classes.view",
+  CLASSES_CREATE: "classes.create",
+  CLASSES_UPDATE: "classes.update",
+  CLASSES_DELETE: "classes.delete",
+
+  // Class Configuration
+  CLASSES_CONFIGURATION_VIEW: "classes-configuration.view",
+  CLASSES_CONFIGURATION_MANAGE: "classes-configuration.manage",
+
+  // Sections Sub-resource
+  SECTIONS_VIEW: "sections.view",
+  SECTIONS_CREATE: "sections.create",
+  SECTIONS_UPDATE: "sections.update",
+  SECTIONS_DELETE: "sections.delete",
+
+  // Occupancy & Auto Section Allocation
+  CLASSES_OCCUPANCY_VIEW: "classes-occupancy.view",
+  CLASSES_AUTO_ALLOCATE: "classes-auto-allocate.trigger",
+
+  
+
+  
 } as const;
 
-export type Permission =
-  (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

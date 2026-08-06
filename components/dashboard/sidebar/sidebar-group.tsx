@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -22,18 +22,19 @@ interface SidebarGroupProps {
 export function SidebarGroup({
   item,
 }: SidebarGroupProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   const { collapsed, closeMobile } = useSidebar();
 
   const defaultOpen =
     item.children?.some((child) =>
-      pathname?.startsWith(child.href)
+      pathname.startsWith(child.href ?? "")
     ) ?? false;
 
   const [open, setOpen] = useState(defaultOpen);
 
-  const Icon = item.icon;
+  // Safely cast LucideIcon to element type to satisfy JSX checks
+  const Icon = item.icon as LucideIcon | undefined;
 
   return (
     <SidebarTooltip label={item.title}>
@@ -42,35 +43,35 @@ export function SidebarGroup({
         onOpenChange={setOpen}
       >
         <CollapsibleTrigger
-  className={`
-    flex
-    w-full
-    items-center
-    rounded-lg
-    px-3
-    py-3
-    transition-colors
-    hover:bg-accent
+          className={`
+            flex
+            w-full
+            items-center
+            rounded-lg
+            px-3
+            py-3
+            transition-colors
+            hover:bg-accent
 
-    ${collapsed ? "justify-center" : "gap-3"}
-  `}
->
-  <Icon className="h-5 w-5 shrink-0" />
+            ${collapsed ? "justify-center" : "gap-3"}
+          `}
+        >
+          {Icon && <Icon className="h-5 w-5 shrink-0" />}
 
-  {!collapsed && (
-    <>
-      <span className="flex-1 text-left">
-        {item.title}
-      </span>
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">
+                {item.title}
+              </span>
 
-      {open ? (
-        <ChevronDown className="h-4 w-4" />
-      ) : (
-        <ChevronRight className="h-4 w-4" />
-      )}
-    </>
-  )}
-</CollapsibleTrigger>
+              {open ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </>
+          )}
+        </CollapsibleTrigger>
 
         {!collapsed && (
           <CollapsibleContent
@@ -82,13 +83,13 @@ export function SidebarGroup({
           >
             <div className="ml-6 mt-1 space-y-1 border-l pl-3">
               {item.children?.map((child) => {
-                const active =
-                  pathname?.startsWith(child.href) ?? false;
+                const childHref = child.href ?? "#";
+                const active = pathname.startsWith(childHref);
 
                 return (
                   <Link
                     key={child.id}
-                    href={child.href}
+                    href={childHref}
                     onClick={closeMobile}
                     className={`
                       flex

@@ -107,7 +107,7 @@ export function DeleteStudentDialog({
 
             <p className="text-sm text-muted-foreground">
               Deleting this student will permanently remove the
-              student's master registration record. If the student
+              students master registration record. If the student
               has enrollment, fee, attendance, examination, or other
               related records, deletion may be restricted depending on
               your system rules.

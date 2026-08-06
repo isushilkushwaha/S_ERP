@@ -1,3 +1,5 @@
+// components/team-switcher.tsx
+
 "use client";
 
 import type { Session } from "next-auth";
@@ -14,7 +16,6 @@ interface TeamSwitcherProps {
 }
 
 export function TeamSwitcher({
-  session,
 }: TeamSwitcherProps) {
   const school = {
     name: "Helexora ERP",

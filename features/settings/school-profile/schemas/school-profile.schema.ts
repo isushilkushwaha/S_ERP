@@ -12,6 +12,9 @@ const postalCodeRegex =
 const websiteRegex =
   /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
 
+const admissionPrefixRegex =
+  /^[A-Z0-9-]+$/;
+
 /**
  * Base Schema
  */
@@ -29,25 +32,39 @@ const schoolProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
 
-  logoUrl: z
-  .string()
-  .trim()
-  .regex(
-    /^\/uploads\/school-profile\/.+$/,
-    "Invalid logo path."
-  )
-  .optional()
-  .or(z.literal("")),
+  admissionPrefix: z
+    .string({
+      error: "Admission prefix is required.",
+    })
+    .trim()
+    .min(1, "Admission prefix cannot be empty.")
+    .max(10, "Admission prefix cannot exceed 10 characters.")
+    .transform((val) => val.toUpperCase())
+    .refine((val) => admissionPrefixRegex.test(val), {
+      message:
+        "Only uppercase letters, numbers, and hyphens are allowed (e.g., ADM, REG, STU, STD, ABC-1).",
+    })
+    .default("ADM"),
 
-faviconUrl: z
-  .string()
-  .trim()
-  .regex(
-    /^\/uploads\/school-profile\/.+$/,
-    "Invalid favicon path."
-  )
-  .optional()
-  .or(z.literal("")),
+  logoUrl: z
+    .string()
+    .trim()
+    .regex(
+      /^\/uploads\/school-profile\/.+$/,
+      "Invalid logo path."
+    )
+    .optional()
+    .or(z.literal("")),
+
+  faviconUrl: z
+    .string()
+    .trim()
+    .regex(
+      /^\/uploads\/school-profile\/.+$/,
+      "Invalid favicon path."
+    )
+    .optional()
+    .or(z.literal("")),
 
   email: z
     .string()

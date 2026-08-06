@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 
 import { personalService } from "@/features/students/services/update/personal.service";
 import { personalSchema } from "@/frontend/students/schemas/update/personal-schema";
+import { Gender } from "@prisma/client";
 
 interface RouteParams {
   params: Promise<{
@@ -26,7 +27,7 @@ export async function PATCH(
         ? new Date(data.dateOfBirth)
         : undefined,
 
-      gender: data.gender as any || undefined,
+      gender: data.gender ? (data.gender as Gender) : undefined,
 
       bloodGroup: data.bloodGroup || undefined,
 

@@ -5,6 +5,7 @@ import type {
 export const defaultSchoolProfileValues: CreateSchoolProfileInput = {
   schoolName: "",
   schoolCode: "",
+  admissionPrefix: "ADM",
   logoUrl: "",
   faviconUrl: "",
 

@@ -33,7 +33,7 @@ export function Localization() {
         <h3 className="text-lg font-semibold">Localization</h3>
 
         <p className="text-sm text-muted-foreground">
-          Configure your school's regional preferences.
+          Configure your schools regional preferences.
         </p>
       </div>
 

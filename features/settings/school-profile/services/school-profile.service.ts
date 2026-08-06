@@ -11,9 +11,6 @@ import {
 } from "../repository/school-profile.repository";
 
 export class SchoolProfileService {
-  getSchoolProfile() {
-      throw new Error("Method not implemented.");
-  }
   constructor(
     private readonly repository = schoolProfileRepository,
   ) {}
@@ -21,31 +18,18 @@ export class SchoolProfileService {
   /**
    * Returns the current school profile.
    */
-//   async get() {
-//     const profile = await this.repository.findProfile();
-
-//     if (!profile) {
-//       throw new NotFoundError(
-//         "School profile not found."
-//       );
-//     }
-
-//     return profile;
-//   }
-
-async get() {
-  return this.repository.findProfile();
-}
+  async get() {
+    return this.repository.findProfile();
+  }
 
   /**
    * Creates a school profile.
    *
-   * Business Rule:
-   * Only one school profile can exist.
+   * Business Rules:
+   * 1. Only one school profile can exist.
+   * 2. Sanitizes admissionPrefix (trims spaces, converts to UPPERCASE, defaults to "ADM").
    */
-  async create(
-    data: CreateSchoolProfileInput,
-  ) {
+  async create(data: CreateSchoolProfileInput) {
     const exists = await this.repository.exists();
 
     if (exists) {
@@ -54,15 +38,24 @@ async get() {
       );
     }
 
-    return this.repository.create(data);
+    const sanitizedPrefix = data.admissionPrefix
+      ? data.admissionPrefix.trim().toUpperCase()
+      : "ADM";
+
+    return this.repository.create({
+      ...data,
+      admissionPrefix: sanitizedPrefix || "ADM",
+    });
   }
 
   /**
    * Updates the existing school profile.
+   *
+   * Business Rules:
+   * 1. Profile must exist to update.
+   * 2. Sanitizes admissionPrefix if provided (trims spaces, converts to UPPERCASE).
    */
-  async update(
-    data: UpdateSchoolProfileInput,
-  ) {
+  async update(data: UpdateSchoolProfileInput) {
     const profile = await this.repository.findProfile();
 
     if (!profile) {
@@ -71,12 +64,18 @@ async get() {
       );
     }
 
+    const updateData: UpdateSchoolProfileInput = { ...data };
+
+    if (updateData.admissionPrefix !== undefined) {
+      const trimmed = updateData.admissionPrefix.trim().toUpperCase();
+      updateData.admissionPrefix = trimmed || "ADM";
+    }
+
     return this.repository.update(
       profile.id,
-      data,
+      updateData,
     );
   }
 }
 
-export const schoolProfileService =
-  new SchoolProfileService();
+export const schoolProfileService = new SchoolProfileService();

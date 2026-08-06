@@ -1,3 +1,5 @@
+// frontend/students/hooks/update/use-update-personal.ts
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { personalApi } from "../../api/update/personal.api";
@@ -8,11 +10,16 @@ import type {
   UpdatePersonalRequest,
 } from "../../types";
 
+interface MutationResponse {
+  data?: Student;
+  [key: string]: unknown;
+}
+
 export function useUpdatePersonal() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    any,
+    MutationResponse | Student,
     Error,
     {
       id: string;
@@ -23,8 +30,9 @@ export function useUpdatePersonal() {
       personalApi.updatePersonal(id, payload),
 
     onSuccess: async (response) => {
-      const updatedStudent: Student =
-        response?.data ?? response;
+      const resp = response as MutationResponse;
+      const updatedStudent: Student | undefined =
+        resp?.data ?? (response as Student);
 
       if (!updatedStudent?.id) return;
 

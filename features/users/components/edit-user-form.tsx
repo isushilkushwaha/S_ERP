@@ -1,4 +1,7 @@
+// features/users/components/edit-user-form.tsx
+
 "use client";
+"use no memo"; // Tells React Compiler to skip manual optimization for this component safely
 
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -15,14 +18,6 @@ import { UserWithRole } from "../types/user-with-role";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
 
 interface EditUserFormProps {
   user: UserWithRole;
@@ -62,6 +57,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       onSuccess?.();
     });
   };
+  
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const isActiveValue = watch("isActive");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -86,28 +84,11 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         <p className="text-sm text-red-500">{errors.username?.message}</p>
       </div>
 
-      {/* Role */}
-      {/* <div>
-        <label className="mb-2 block text-sm font-medium">Role</label>
-        <Select
-          value={watch("role")}
-          onValueChange={(value) => setValue("role", value as "ADMIN" | "TEACHER")}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ADMIN">Administrator</SelectItem>
-            <SelectItem value="TEACHER">Teacher</SelectItem>
-          </SelectContent>
-        </Select>
-      </div> */}
-
       {/* Active Switch */}
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">Active</label>
         <Switch
-          checked={watch("isActive")}
+          checked={isActiveValue}
           onCheckedChange={(checked) => setValue("isActive", checked)}
         />
       </div>

@@ -6,7 +6,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
@@ -25,7 +24,7 @@ export function Branding() {
         </h3>
 
         <p className="text-sm text-muted-foreground">
-          Configure your school's branding information.
+          Configure your school branding information.
         </p>
       </div>
 

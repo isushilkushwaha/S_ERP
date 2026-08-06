@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, ShieldCheck, School, HeartPulse, Pencil, Calendar, Hash } from "lucide-react";
+import { User, ShieldCheck, School, HeartPulse, Pencil, Calendar} from "lucide-react";
 import { format } from "date-fns";
 
 import {

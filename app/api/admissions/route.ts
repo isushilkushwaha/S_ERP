@@ -6,7 +6,7 @@ import { createAdmissionSchema } from "@/features/admissions/validators/admissio
 import { AdmissionService } from "@/features/admissions/services/admission.service";
 import { AdmissionDomainError } from "@/features/admissions/errors/admission.errors";
 import { CreateAdmissionPayloadDTO } from "@/features/admissions/dto/admission.dto";
-import { Prisma } from "@prisma/client"; // 👈 Import StudentStatus enum
+import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 
 const DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000";
@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.StudentEnrollmentWhereInput = {
       ...(academicYearId && academicYearId !== "ALL" && { academicYearId }),
-      // ✅ Fix: Cast statusParam to match Prisma's StudentEnrollmentWhereInput status type
       ...(statusParam && statusParam !== "ALL" && { status: statusParam as Prisma.StudentEnrollmentWhereInput['status'] }),
       ...(classId && { classId }),
       ...(sectionId && { sectionId }),
@@ -84,7 +83,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    // ✅ Fix 2: Type error safely as Error
     const err = error as Error;
     console.error("[API_ADMISSIONS_GET]", err);
     return NextResponse.json(
@@ -103,17 +101,36 @@ export async function POST(req: NextRequest) {
     const tenantId = req.headers.get("x-tenant-id") || DEFAULT_TENANT_ID;
     const body = await req.json();
 
+    // Safely transform concession description: handle null/empty values to satisfy AdmissionConcessionDTO
+    const rawConcession = body.concession;
+    const concession = rawConcession
+      ? {
+          discountType: String(rawConcession.discountType),
+          discountAmount: Number(rawConcession.discountAmount || 0),
+          description:
+            rawConcession.description != null ? String(rawConcession.description) : undefined,
+        }
+      : undefined;
+
     // 1. Validate request payload using Zod
     const validated = createAdmissionSchema.parse({
       ...body,
       tenantId,
       admissionDate: new Date(body.admissionDate),
+      concession,
     });
 
     // 2. Map validated object to CreateAdmissionPayloadDTO cleanly
     const payload: CreateAdmissionPayloadDTO = {
       ...validated,
       sectionId: validated.sectionId || "",
+      concession:
+        validated.concession == null
+          ? validated.concession
+          : {
+              ...validated.concession,
+              description: validated.concession.description ?? undefined,
+            },
     };
 
     // 3. Delegate full transactional processing to AdmissionService
@@ -128,7 +145,6 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    // ✅ Fix 3: Type error safely as Error / PrismaClientKnownRequestError
     const err = error as Error & { code?: string; meta?: { target?: string[] } };
     console.error("[API_ADMISSIONS_POST]", err);
 

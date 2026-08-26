@@ -1,3 +1,5 @@
+
+
 import { 
   Gender, 
   AdmissionType, 
@@ -75,6 +77,7 @@ export interface Step3AcademicAdmissionDTO {
 }
 
 export interface FeeComponentItemDTO {
+  id: any;
   feeComponentId: string;
   name: string;
   code: string;
@@ -83,12 +86,46 @@ export interface FeeComponentItemDTO {
 }
 
 export interface AssignedFeeStructureDTO {
+  [x: string]: any;
+  className: string;
   feeStructureId: string;
   academicYearId: string;
   classId: string;
   totalAmount: number;
   items: FeeComponentItemDTO[];
 }
+
+// --- NEW DTOs FOR CONCESSION & INSTALLMENT TEMPLATE ---
+
+export interface AdmissionConcessionDTO {
+  discountType: string;
+  discountAmount: number;
+  description?: string;
+}
+
+export interface InstallmentMilestonePreviewDTO {
+  id: string;
+  name: string;
+  dueDate?: string | null;
+  value: number;
+  components?: Array<{
+    feeComponentId: string;
+    feeComponent?: {
+      name: string;
+      code: string;
+    };
+  }>;
+}
+
+export interface InstallmentPlanTemplateDTO {
+  id: string;
+  name: string;
+  code: string;
+  planType: string;
+  items: InstallmentMilestonePreviewDTO[];
+}
+
+// --- UPDATED PAYLOAD FOR FINAL SUBMISSION ---
 
 export interface CreateAdmissionPayloadDTO {
   studentId: string;
@@ -106,6 +143,12 @@ export interface CreateAdmissionPayloadDTO {
   isHostelRequired: boolean;
   isTransportRequired: boolean;
   remarks?: string | null;
+  
+  // Fee Structure & Financials
+  feeStructureId: string;
+  concession?: AdmissionConcessionDTO | null;
+  installmentPlanId?: string | null; // Selected class default template ID
+  
   tenantId: string;
   createdBy?: string;
 }
@@ -127,4 +170,5 @@ export interface AdmissionResponseDTO {
   admissionDate: Date;
   status: StudentStatus;
   totalFeesAssigned: number;
+  finalPayableAmount: number;
 }

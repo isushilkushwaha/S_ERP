@@ -2,6 +2,10 @@ import { z } from "zod";
 
 export const classConfigurationSchema = z
   .object({
+    academicYearId: z
+      .string()
+      .uuid("Invalid academic year ID."),
+
     classId: z
       .string()
       .uuid("Invalid Class ID format."),
@@ -12,7 +16,10 @@ export const classConfigurationSchema = z
       .coerce
       .number()
       .int("Default capacity must be an integer.")
-      .min(1, "Default section capacity must be at least 1.")
+      .min(
+        1,
+        "Default section capacity must be at least 1."
+      )
       .nullable()
       .optional(),
 
@@ -20,18 +27,25 @@ export const classConfigurationSchema = z
       .coerce
       .number()
       .int("Maximum capacity must be an integer.")
-      .min(1, "Maximum students without section must be at least 1.")
+      .min(
+        1,
+        "Maximum students without section must be at least 1."
+      )
       .nullable()
       .optional(),
 
-    autoAllocationEnabled: z.boolean().default(true),
+    autoAllocationEnabled: z
+      .boolean()
+      .default(true),
   })
   .refine(
     (data) => {
       if (!data.sectionsEnabled) {
         return (
-          data.maxStudentsWithoutSection !== null &&
-          data.maxStudentsWithoutSection !== undefined &&
+          data.maxStudentsWithoutSection !==
+            null &&
+          data.maxStudentsWithoutSection !==
+            undefined &&
           data.maxStudentsWithoutSection > 0
         );
       }
@@ -41,15 +55,19 @@ export const classConfigurationSchema = z
     {
       message:
         "Maximum students without section is required when sections are disabled.",
-      path: ["maxStudentsWithoutSection"],
+      path: [
+        "maxStudentsWithoutSection",
+      ],
     }
   )
   .refine(
     (data) => {
       if (data.sectionsEnabled) {
         return (
-          data.defaultSectionCapacity !== null &&
-          data.defaultSectionCapacity !== undefined &&
+          data.defaultSectionCapacity !==
+            null &&
+          data.defaultSectionCapacity !==
+            undefined &&
           data.defaultSectionCapacity > 0
         );
       }
@@ -59,10 +77,11 @@ export const classConfigurationSchema = z
     {
       message:
         "Default section capacity is required when sections are enabled.",
-      path: ["defaultSectionCapacity"],
+      path: [
+        "defaultSectionCapacity",
+      ],
     }
   );
 
-export type ClassConfigurationInput = z.infer<
-  typeof classConfigurationSchema
->;
+export type ClassConfigurationInput =
+  z.infer<typeof classConfigurationSchema>;

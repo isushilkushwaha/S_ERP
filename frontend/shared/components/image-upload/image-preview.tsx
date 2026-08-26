@@ -1,4 +1,4 @@
-// frontend/shared/components/image-upload/image-preview.tsx
+// frontend/shared/components/image-preview.tsx
 
 "use client";
 
@@ -11,13 +11,6 @@ interface ImagePreviewProps {
   src?: string;
   alt?: string;
   className?: string;
-  /**
-   * Compact standard size variants:
-   * - `sm`: 120x120 (Compact forms)
-   * - `md`: 160x160 (Standard profile / branding preview - default)
-   * - `lg`: 220x220 (Card headers / banners)
-   * - `avatar`: 112x112 rounded full circle
-   */
   size?: "sm" | "md" | "lg" | "avatar";
 }
 
@@ -44,13 +37,21 @@ export function ImagePreview({
   const [imageError, setImageError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
 
-  // Derived state sync without useEffect
   if (src !== currentSrc) {
     setCurrentSrc(src);
     setImageError(false);
   }
 
-  const hasImage = Boolean(src) && !imageError;
+  // 👈 Sanitize and format the image source safely for Next.js
+  let formattedSrc: string | undefined = undefined;
+  if (src && typeof src === "string" && src.trim() !== "") {
+    const trimmed = src.trim();
+    formattedSrc = trimmed.startsWith("http") || trimmed.startsWith("/")
+      ? trimmed
+      : `/${trimmed}`;
+  }
+
+  const hasImage = Boolean(formattedSrc) && !imageError;
   const dimension = dimensionMap[size];
 
   return (
@@ -61,13 +62,14 @@ export function ImagePreview({
         className
       )}
     >
-      {hasImage && src ? (
+      {hasImage && formattedSrc ? (
         <div className="relative w-full h-full">
           <Image
-            src={src}
+            src={formattedSrc}
             alt={alt}
             width={dimension}
             height={dimension}
+            unoptimized // 👈 Essential for local dynamic public folder uploads
             className="h-full w-full object-contain p-2 transition-transform duration-300 hover:scale-105"
             onError={() => setImageError(true)}
           />

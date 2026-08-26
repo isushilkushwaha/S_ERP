@@ -54,14 +54,26 @@ export function SchoolProfileDetails({
   };
 
   const formattedAddress = [
-    profile.city,
-    profile.district,
-    profile.state,
-    profile.country,
-    profile.postalCode,
+    profile?.city,
+    profile?.district,
+    profile?.state,
+    profile?.country,
+    profile?.postalCode,
   ]
     .filter(Boolean)
     .join(", ");
+
+  // Safely check and format logo URL with proper optional chaining
+  const hasValidLogo =
+    profile?.logoUrl &&
+    typeof profile.logoUrl === "string" &&
+    profile.logoUrl.trim() !== "";
+
+  const logoSrc = hasValidLogo
+    ? profile.logoUrl!.startsWith("http") || profile.logoUrl!.startsWith("/")
+      ? profile.logoUrl!
+      : `/${profile.logoUrl!}`
+    : null;
 
   return (
     <TooltipProvider>
@@ -75,10 +87,10 @@ export function SchoolProfileDetails({
               <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                 <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-background bg-background shadow-md">
                   <div className="flex h-full w-full items-center justify-center rounded-xl bg-muted">
-                    {profile.logoUrl ? (
+                    {logoSrc ? (
                       <img
-                        src={profile.logoUrl}
-                        alt={profile.schoolName}
+                        src={logoSrc}
+                        alt={profile?.schoolName || "School Logo"}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -90,9 +102,9 @@ export function SchoolProfileDetails({
                 <div className="space-y-1 pb-1">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                      {profile.schoolName}
+                      {profile?.schoolName}
                     </h1>
-                    {profile.board && (
+                    {profile?.board && (
                       <Badge variant="outline" className="font-medium bg-background/50">
                         {profile.board}
                       </Badge>
@@ -102,7 +114,7 @@ export function SchoolProfileDetails({
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <span>School Code:</span>
                     <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs font-semibold text-foreground border border-border/50">
-                      {displayValue(profile.schoolCode)}
+                      {displayValue(profile?.schoolCode)}
                     </code>
                   </p>
                 </div>
@@ -148,29 +160,29 @@ export function SchoolProfileDetails({
                   label="Admission Prefix"
                   value={
                     <code className="rounded bg-primary/10 px-2 py-0.5 font-mono text-xs font-bold text-primary border border-primary/20">
-                      {profile.admissionPrefix || "ADM"}
+                      {profile?.admissionPrefix || "ADM"}
                     </code>
                   }
                 />
                 <DetailRow
                   icon={<Award className="h-4 w-4" />}
                   label="Affiliation Number"
-                  value={displayValue(profile.affiliationNumber)}
+                  value={displayValue(profile?.affiliationNumber)}
                 />
                 <DetailRow
                   icon={<UserCheck className="h-4 w-4" />}
                   label="Principal / Head of Institution"
-                  value={displayValue(profile.principalName)}
+                  value={displayValue(profile?.principalName)}
                 />
                 <DetailRow
                   icon={<Clock className="h-4 w-4" />}
                   label="Timezone"
-                  value={displayValue(profile.timezone)}
+                  value={displayValue(profile?.timezone)}
                 />
                 <DetailRow
                   icon={<Coins className="h-4 w-4" />}
                   label="Operating Currency"
-                  value={displayValue(profile.currency)}
+                  value={displayValue(profile?.currency)}
                 />
               </div>
             </CardContent>
@@ -191,16 +203,16 @@ export function SchoolProfileDetails({
                 <DetailRow
                   icon={<Mail className="h-4 w-4" />}
                   label="Official Email"
-                  value={displayValue(profile.email)}
-                  href={profile.email ? `mailto:${profile.email}` : undefined}
+                  value={displayValue(profile?.email)}
+                  href={profile?.email ? `mailto:${profile.email}` : undefined}
                 />
                 <DetailRow
                   icon={<Phone className="h-4 w-4" />}
                   label="Primary Phone"
-                  value={displayValue(profile.phone)}
-                  href={profile.phone ? `tel:${profile.phone}` : undefined}
+                  value={displayValue(profile?.phone)}
+                  href={profile?.phone ? `tel:${profile.phone}` : undefined}
                 />
-                {profile.alternatePhone && (
+                {profile?.alternatePhone && (
                   <DetailRow
                     icon={<Phone className="h-4 w-4" />}
                     label="Alternate Phone"
@@ -211,11 +223,11 @@ export function SchoolProfileDetails({
                 <DetailRow
                   icon={<Globe className="h-4 w-4" />}
                   label="Website"
-                  value={displayValue(profile.website)}
+                  value={displayValue(profile?.website)}
                   href={
-                    profile.website?.startsWith("http")
+                    profile?.website?.startsWith("http")
                       ? profile.website
-                      : profile.website
+                      : profile?.website
                       ? `https://${profile.website}`
                       : undefined
                   }
@@ -242,9 +254,9 @@ export function SchoolProfileDetails({
                 </div>
                 <div className="space-y-1.5 text-base">
                   <p className="font-semibold text-foreground">
-                    {displayValue(profile.addressLine1)}
+                    {displayValue(profile?.addressLine1)}
                   </p>
-                  {profile.addressLine2 && (
+                  {profile?.addressLine2 && (
                     <p className="text-muted-foreground">
                       {profile.addressLine2}
                     </p>

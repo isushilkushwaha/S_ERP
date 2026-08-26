@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner"; // Modern toast library
+import { toast } from "sonner";
 
 import {
   createSchoolProfileSchema,
@@ -43,6 +44,13 @@ export function SchoolProfileForm({
       ? mapSchoolProfileToForm(profile)
       : defaultSchoolProfileValues,
   });
+
+  // 👈 CRITICAL: Sync form values if the profile prop updates or loads asynchronously
+  useEffect(() => {
+    if (profile) {
+      methods.reset(mapSchoolProfileToForm(profile));
+    }
+  }, [profile, methods]);
 
   const handleFormSubmit = methods.handleSubmit(async (values) => {
     const actionText = mode === "create" ? "creating" : "updating";

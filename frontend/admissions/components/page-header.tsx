@@ -1,8 +1,10 @@
+// frontend/admissions/components/page-header.tsx
+
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { GraduationCap, Plus, RotateCw} from "lucide-react";
+import { GraduationCap, Plus, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,10 +19,17 @@ export function PageHeader({
   isRefetching = false,
   onRefresh,
 }: PageHeaderProps) {
-  const currentTime = new Date().toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    // Format time only on the client side to avoid SSR/client hydration mismatch
+    setCurrentTime(
+      new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+  }, []);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 pb-2">
@@ -46,7 +55,7 @@ export function PageHeader({
 
       <div className="flex items-center space-x-2.5 self-start sm:self-center">
         <span className="text-[11px] font-mono text-zinc-400 hidden lg:inline-block">
-          Updated Today • {currentTime}
+          Updated Today{currentTime ? ` • ${currentTime}` : ""}
         </span>
 
         {onRefresh && (

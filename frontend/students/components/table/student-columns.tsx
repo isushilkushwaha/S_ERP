@@ -46,48 +46,59 @@ export const studentColumns: ColumnDef<StudentListItem>[] = [
     enableHiding: false,
   },
 
-  
-         {
-  id: "student",
-  header: "Student Name",
-  cell: ({ row }) => {
-    const student = row.original;
+  {
+    id: "student",
+    header: "Student Name",
+    cell: ({ row }) => {
+      const student = row.original;
 
-    const fullName = [
-      student.firstName,
-      student.middleName,
-      student.lastName,
-    ]
-      .filter(Boolean)
-      .join(" ");
+      const fullName = [
+        student.firstName,
+        student.middleName,
+        student.lastName,
+      ]
+        .filter(Boolean)
+        .join(" ");
 
-    return (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage
-            src={student.photo ?? ""}
-            alt={fullName}
-          />
+      // Fix: Convert empty strings or whitespace-only paths to undefined so AvatarImage skips them
+      const studentPhoto =
+        student.photo && student.photo.trim() !== "" ? student.photo : undefined;
 
-          <AvatarFallback>
-            {student.firstName?.charAt(0)}
-            {student.lastName?.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
+      // Normalize URL if it's a relative path
+      const avatarSrc = studentPhoto
+        ? studentPhoto.startsWith("http") || studentPhoto.startsWith("/")
+          ? studentPhoto
+          : `/${studentPhoto}`
+        : undefined;
 
-        <div className="flex flex-col">
-          <span className="font-medium">
-            {fullName}
-          </span>
+      return (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={avatarSrc}
+              alt={fullName}
+            />
 
-          <span className="text-xs text-muted-foreground">
-            {student.studentCode}
-          </span>
+            <AvatarFallback>
+              {student.firstName?.charAt(0)}
+              {student.lastName?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex flex-col">
+            <span className="font-medium">
+              {fullName}
+            </span>
+
+            <span className="text-xs text-muted-foreground">
+              {student.studentCode}
+            </span>
+          </div>
         </div>
-      </div>
-    );
+      );
+    },
   },
-},
+
   /**
    * Father Name
    */
@@ -116,23 +127,23 @@ export const studentColumns: ColumnDef<StudentListItem>[] = [
   },
 
   {
-  accessorKey: "dateOfBirth",
-  header: "DOB",
-  cell: ({ row }) => {
-    const dob = row.original.dateOfBirth;
+    accessorKey: "dateOfBirth",
+    header: "DOB",
+    cell: ({ row }) => {
+      const dob = row.original.dateOfBirth;
 
-    if (!dob) return "-";
+      if (!dob) return "-";
 
-    const birthDate = new Date(dob);
-    const age = differenceInYears(new Date(), birthDate);
+      const birthDate = new Date(dob);
+      const age = differenceInYears(new Date(), birthDate);
 
-    return (
-      <span>
-        {format(birthDate, "dd MMM yyyy")} ({age} Y)
-      </span>
-    );
+      return (
+        <span>
+          {format(birthDate, "dd MMM yyyy")} ({age} Y)
+        </span>
+      );
+    },
   },
-},
 
   /**
    * Registration Date
@@ -150,26 +161,26 @@ export const studentColumns: ColumnDef<StudentListItem>[] = [
   },
 
   /**
- * Profile Action
- */
-{
-  id: "profile",
-  header: "Profile",
-  cell: ({ row }) => (
-    <Link
-      href={`/students/${row.original.id}`}
-      title="View Profile"
-      aria-label="View Profile"
-      className={buttonVariants({
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8",
-      })}
-    >
-      <Eye className="h-4 w-4 text-muted-foreground" />
-    </Link>
-  ),
-  enableSorting: false,
-  enableHiding: false,
-},
+   * Profile Action
+   */
+  {
+    id: "profile",
+    header: "Profile",
+    cell: ({ row }) => (
+      <Link
+        href={`/students/${row.original.id}`}
+        title="View Profile"
+        aria-label="View Profile"
+        className={buttonVariants({
+          variant: "ghost",
+          size: "icon",
+          className: "h-8 w-8",
+        })}
+      >
+        <Eye className="h-4 w-4 text-muted-foreground" />
+      </Link>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
 ];

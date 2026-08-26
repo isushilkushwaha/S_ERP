@@ -1,11 +1,10 @@
-// app/(dashboard)/settings/classes/page.tsx
-
 "use client";
 
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Calendar } from "lucide-react";
+
 import {
   useClasses,
   useCreateClass,
@@ -18,6 +17,7 @@ import {
   useDeleteSection,
   useOccupancy,
 } from "@/frontend/settings/classes/hooks";
+
 import {
   ClassesTable,
   ClassDialog,
@@ -25,13 +25,21 @@ import {
   SectionsCard,
   OccupancyCard,
 } from "@/frontend/settings/classes/components";
+
 import { Class } from "@/frontend/settings/classes/types/class";
+
 import { z } from "zod";
 import { createClassSchema } from "@/features/settings/classes/schema/create-class.schema";
 import { classConfigurationSchema } from "@/features/settings/classes/schema/class-configuration.schema";
 
-// shadcn UI imports
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,8 +51,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type ClassFormValues = z.infer<typeof createClassSchema>;
-type ConfigFormValues = z.infer<typeof classConfigurationSchema>;
+/**
+ * ClassDialog does not ask the user for academicYearId.
+ * The page automatically supplies the selected academic year.
+ */
+const classDialogSchema = createClassSchema.omit({
+  academicYearId: true,
+});
+
+type ClassFormValues = z.infer<typeof classDialogSchema>;
+
+type ConfigFormValues = z.infer<
+  typeof classConfigurationSchema
+>;
 
 interface AcademicYear {
   id: string;
@@ -54,148 +73,437 @@ interface AcademicYear {
 }
 
 export default function ClassesSettingsPage() {
-  const [userSelectedClassId, setUserSelectedClassId] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<Class | null>(null);
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
-  // States for custom Delete Confirmations
-  const [deletingClassId, setDeletingClassId] = useState<string | null>(null);
-  const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
+  const [
+    userSelectedClassId,
+    setUserSelectedClassId,
+  ] = useState<string | null>(null);
 
-  // 1. Fetch Academic Years from settings & default to ACTIVE
-  const { data: academicYearsData } = useQuery({
+  const [
+    userSelectedAcademicYearId,
+    setUserSelectedAcademicYearId,
+  ] = useState<string | null>(null);
+
+  const [isDialogOpen, setIsDialogOpen] =
+    useState(false);
+
+  const [editingClass, setEditingClass] =
+    useState<Class | null>(null);
+
+  const [deletingClassId, setDeletingClassId] =
+    useState<string | null>(null);
+
+  const [
+    deletingSectionId,
+    setDeletingSectionId,
+  ] = useState<string | null>(null);
+
+  // ==========================================================
+  // ACADEMIC YEARS
+  // ==========================================================
+
+  const {
+    data: academicYearsData,
+    isLoading: isLoadingAcademicYears,
+  } = useQuery({
     queryKey: ["academic-years-list"],
+
     queryFn: async () => {
-      const res = await fetch("/api/settings/academic-years");
-      if (!res.ok) return [];
-      const json = await res.json();
-      const list = json.data || json.items || json || [];
-      return Array.isArray(list) ? list : [];
+      const response = await fetch(
+        "/api/settings/academic-years"
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load academic years."
+        );
+      }
+
+      const json = await response.json();
+
+      const list =
+        json.data ??
+        json.items ??
+        json ??
+        [];
+
+      return Array.isArray(list)
+        ? list
+        : [];
     },
+
+    staleTime: 1000 * 60 * 5,
   });
 
-  const academicYears = Array.isArray(academicYearsData) ? (academicYearsData as AcademicYear[]) : [];
+  const academicYears: AcademicYear[] =
+    Array.isArray(academicYearsData)
+      ? academicYearsData
+      : [];
 
-  // ✅ Derive selected session state immediately from fetched data without any useEffect
-  const [userSelectedAcademicYearId, setUserSelectedAcademicYearId] = useState<string | null>(null);
+  // ==========================================================
+  // ACTIVE ACADEMIC YEAR
+  // ==========================================================
 
   const activeYear = academicYears.find(
-    (ay) => ay.status === "ACTIVE" || ay.isActive === true
+    (academicYear) =>
+      academicYear.status === "ACTIVE" ||
+      academicYear.isActive === true
   );
-  const selectedAcademicYearId = 
-    userSelectedAcademicYearId !== null
-      ? userSelectedAcademicYearId
-      : activeYear?.id || academicYears[0]?.id || "ALL";
 
-  const selectedYearObject = academicYears.find((ay) => ay.id === selectedAcademicYearId);
+  // ==========================================================
+  // SELECTED ACADEMIC YEAR
+  // ==========================================================
 
-  // 2. Fetch Master Classes List
-  const { data: classes = [], isLoading: isLoadingClasses } = useClasses();
+  /**
+   * Always return a string.
+   *
+   * This keeps the Base UI Select controlled
+   * from the first render.
+   */
+  const selectedAcademicYearId =
+    userSelectedAcademicYearId ??
+    activeYear?.id ??
+    "";
 
-  // ✅ Derive selected class ID cleanly without using an effect + setState
-  const selectedClassId = 
-    userSelectedClassId !== null 
-      ? userSelectedClassId 
-      : classes[0]?.id || null;
+  const selectedYearObject =
+    academicYears.find(
+      (academicYear) =>
+        academicYear.id ===
+        selectedAcademicYearId
+    );
 
-  const selectedClass = classes.find((c) => c.id === selectedClassId) || null;
-  const activeClassId = selectedClass?.id || "";
+  // ==========================================================
+  // CLASSES
+  // ==========================================================
 
-  // 3. Class Mutation Hooks
-  const createClassMutation = useCreateClass();
-  const updateClassMutation = useUpdateClass();
-  const deleteClassMutation = useDeleteClass();
+  const {
+    data: classesData,
+    isLoading: isClassesLoading,
+    isFetching: isFetchingClasses,
+  } = useClasses(
+    selectedAcademicYearId,
+    "ACTIVE"
+  );
 
-  // 4. Active Class Configuration & Sections Hooks
-  const { data: configuration } = useConfiguration(activeClassId);
-  const updateConfigMutation = useUpdateConfiguration();
+  const classes: Class[] =
+    Array.isArray(classesData)
+      ? classesData
+      : [];
 
-  const { data: sections = [] } = useSections(activeClassId);
-  const createSectionMutation = useCreateSection();
-  const deleteSectionMutation = useDeleteSection();
+  // ==========================================================
+  // SELECTED CLASS
+  // ==========================================================
 
-  // 5. Pass selectedAcademicYearId to track session-based occupancy and enrollment seats
-  const { data: occupancyReport, isLoading: isLoadingOccupancy } = useOccupancy(
+  const selectedClassId =
+    userSelectedClassId &&
+    classes.some(
+      (classItem) =>
+        classItem.id ===
+        userSelectedClassId
+    )
+      ? userSelectedClassId
+      : classes[0]?.id ?? null;
+
+  const selectedClass =
+    classes.find(
+      (classItem) =>
+        classItem.id === selectedClassId
+    ) ?? null;
+
+  const activeClassId =
+    selectedClass?.id ?? "";
+
+  // ==========================================================
+  // CLASS MUTATIONS
+  // ==========================================================
+
+  const createClassMutation =
+    useCreateClass();
+
+  const updateClassMutation =
+    useUpdateClass();
+
+  const deleteClassMutation =
+    useDeleteClass();
+
+  // ==========================================================
+  // CONFIGURATION
+  // ==========================================================
+
+  const {
+    data: configuration,
+    isLoading: isLoadingConfiguration,
+  } = useConfiguration(
+    selectedAcademicYearId,
+    activeClassId
+  );
+
+  const updateConfigMutation =
+    useUpdateConfiguration();
+
+  // ==========================================================
+  // SECTIONS
+  // ==========================================================
+
+  const {
+    data: sections = [],
+  } = useSections(activeClassId);
+
+  const createSectionMutation =
+    useCreateSection();
+
+  const deleteSectionMutation =
+    useDeleteSection();
+
+  // ==========================================================
+  // OCCUPANCY
+  // ==========================================================
+
+  const {
+    data: occupancyReport,
+    isLoading: isLoadingOccupancy,
+  } = useOccupancy(
     activeClassId,
     selectedAcademicYearId
   );
 
-  // Selection Handler
-  const handleSelectClass = (cls: Class) => {
+  // ==========================================================
+  // SELECT CLASS
+  // ==========================================================
+
+  const handleSelectClass = (
+    cls: Class
+  ) => {
     setUserSelectedClassId(cls.id);
   };
 
-  // Class Form Dialog
+  // ==========================================================
+  // CHANGE ACADEMIC YEAR
+  // ==========================================================
+
+  /**
+   * IMPORTANT:
+   *
+   * Base UI Select returns:
+   *
+   * string | null
+   *
+   * Therefore this handler MUST accept
+   * string | null, not only string.
+   */
+  const handleAcademicYearChange = (
+    academicYearId: string | null
+  ) => {
+    if (academicYearId === null) {
+      return;
+    }
+
+    setUserSelectedAcademicYearId(
+      academicYearId
+    );
+
+    // The selected class belongs to
+    // the previous academic year.
+    // Clear it when session changes.
+    setUserSelectedClassId(null);
+  };
+
+  // ==========================================================
+  // CREATE CLASS DIALOG
+  // ==========================================================
+
   const handleOpenCreateDialog = () => {
     setEditingClass(null);
     setIsDialogOpen(true);
   };
 
-  const handleOpenEditDialog = (cls: Class) => {
+  // ==========================================================
+  // EDIT CLASS DIALOG
+  // ==========================================================
+
+  const handleOpenEditDialog = (
+    cls: Class
+  ) => {
     setEditingClass(cls);
     setIsDialogOpen(true);
   };
 
-  const handleSaveClass = async (data: ClassFormValues) => {
+  // ==========================================================
+  // SAVE CLASS
+  // ==========================================================
+
+  const handleSaveClass = async (
+    data: ClassFormValues
+  ) => {
     try {
+      // ------------------------------------------------------
+      // UPDATE
+      // ------------------------------------------------------
+
       if (editingClass) {
         await updateClassMutation.mutateAsync({
           id: editingClass.id,
           payload: data,
         });
-        toast.success(`Class "${data.name}" updated successfully!`);
-      } else {
-        await createClassMutation.mutateAsync(data);
-        toast.success(`Class "${data.name}" created successfully!`);
+
+        toast.success(
+          `Class "${data.name}" updated successfully!`
+        );
       }
+
+      // ------------------------------------------------------
+      // CREATE
+      // ------------------------------------------------------
+
+      else {
+        if (!selectedAcademicYearId) {
+          toast.error(
+            "Please select an academic year first."
+          );
+
+          return;
+        }
+
+        await createClassMutation.mutateAsync({
+          ...data,
+          academicYearId:
+            selectedAcademicYearId,
+        });
+
+        toast.success(
+          `Class "${data.name}" created and assigned to ${
+            selectedYearObject?.name ??
+            "the selected academic year"
+          }.`
+        );
+      }
+
       setIsDialogOpen(false);
     } catch (error: unknown) {
-      const err = error as Error;
-      toast.error(err.message || "Failed to save class.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to save class.";
+
+      toast.error(message);
     }
   };
 
-  // CONFIRMATION HANDLERS FOR CLASS DELETION
-  const handleTriggerDeleteClass = (id: string) => {
+  // ==========================================================
+  // DELETE CLASS
+  // ==========================================================
+
+  const handleTriggerDeleteClass = (
+    id: string
+  ) => {
     setDeletingClassId(id);
   };
 
-  const handleConfirmDeleteClass = async () => {
-    if (!deletingClassId) return;
-    try {
-      await deleteClassMutation.mutateAsync(deletingClassId);
-      toast.success("Class deleted successfully!");
-      if (selectedClassId === deletingClassId) {
-        setUserSelectedClassId(null);
+  const handleConfirmDeleteClass =
+    async () => {
+      if (!deletingClassId) {
+        return;
       }
-    } catch (error: unknown) {
-      const err = error as Error;
-      toast.error(err.message || "Failed to delete class.");
-    } finally {
-      setDeletingClassId(null);
-    }
-  };
 
+      try {
+        await deleteClassMutation.mutateAsync(
+          deletingClassId
+        );
+
+        toast.success(
+          "Class deleted successfully!"
+        );
+
+        if (
+          selectedClassId ===
+          deletingClassId
+        ) {
+          setUserSelectedClassId(null);
+        }
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to delete class.";
+
+        toast.error(message);
+      } finally {
+        setDeletingClassId(null);
+      }
+    };
+
+  // ==========================================================
   // SAVE CONFIGURATION
-  const handleSaveConfiguration = async (payload: ConfigFormValues) => {
+  // ==========================================================
+
+  const handleSaveConfiguration = async (
+    payload: ConfigFormValues
+  ) => {
+    if (!selectedAcademicYearId) {
+      toast.error(
+        "Please select an academic year first."
+      );
+
+      return;
+    }
+
+    if (!activeClassId) {
+      toast.error(
+        "Please select a class first."
+      );
+
+      return;
+    }
+
     try {
       await updateConfigMutation.mutateAsync({
-        classId: payload.classId,
-        sectionsEnabled: payload.sectionsEnabled,
-        defaultSectionCapacity: payload.defaultSectionCapacity,
-        maxStudentsWithoutSection: payload.maxStudentsWithoutSection,
-        autoAllocationEnabled: payload.autoAllocationEnabled,
+        academicYearId:
+          selectedAcademicYearId,
+
+        classId: activeClassId,
+
+        sectionsEnabled:
+          payload.sectionsEnabled,
+
+        defaultSectionCapacity:
+          payload.defaultSectionCapacity,
+
+        maxStudentsWithoutSection:
+          payload.maxStudentsWithoutSection,
+
+        autoAllocationEnabled:
+          payload.autoAllocationEnabled,
       });
-      toast.success("Configuration updated successfully!");
+
+      toast.success(
+        "Configuration updated successfully!"
+      );
     } catch (error: unknown) {
-      const err = error as Error;
-      toast.error(err.message || "Failed to update configuration.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to update configuration.";
+
+      toast.error(message);
     }
   };
 
+  // ==========================================================
   // CREATE SECTION
-  const handleCreateSection = async (name: string, capacity: number, displayOrder: number) => {
-    if (!activeClassId) return;
+  // ==========================================================
+
+  const handleCreateSection = async (
+    name: string,
+    capacity: number,
+    displayOrder: number
+  ) => {
+    if (!activeClassId) {
+      return;
+    }
+
     try {
       await createSectionMutation.mutateAsync({
         classId: activeClassId,
@@ -203,182 +511,399 @@ export default function ClassesSettingsPage() {
         capacity,
         displayOrder,
       });
-      toast.success(`Section ${name} created successfully!`);
+
+      toast.success(
+        `Section ${name} created successfully!`
+      );
     } catch (error: unknown) {
-      const err = error as Error;
-      toast.error(err.message || "Failed to create section.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to create section.";
+
+      toast.error(message);
     }
   };
 
-  // CONFIRMATION HANDLERS FOR SECTION DELETION
-  const handleTriggerDeleteSection = async (sectionId: string) => {
+  // ==========================================================
+  // TRIGGER SECTION DELETE
+  // ==========================================================
+
+  const handleTriggerDeleteSection = async (
+    sectionId: string
+  ): Promise<void> => {
     setDeletingSectionId(sectionId);
   };
 
-  const handleConfirmDeleteSection = async () => {
-    if (!deletingSectionId || !activeClassId) return;
-    try {
-      await deleteSectionMutation.mutateAsync({
-        id: deletingSectionId,
-        classId: activeClassId,
-      });
-      toast.success("Section deleted successfully!");
-    } catch (error: unknown) {
-      const err = error as Error;
-      toast.error(err.message || "Failed to delete section.");
-    } finally {
-      setDeletingSectionId(null);
-    }
-  };
+  // ==========================================================
+  // CONFIRM SECTION DELETE
+  // ==========================================================
+
+  const handleConfirmDeleteSection =
+    async () => {
+      if (
+        !deletingSectionId ||
+        !activeClassId
+      ) {
+        return;
+      }
+
+      try {
+        await deleteSectionMutation.mutateAsync({
+          id: deletingSectionId,
+          classId: activeClassId,
+        });
+
+        toast.success(
+          "Section deleted successfully!"
+        );
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to delete section.";
+
+        toast.error(message);
+      } finally {
+        setDeletingSectionId(null);
+      }
+    };
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* Header & Global Academic Year Filter */}
+
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
+
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Classes & Sections</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+            Classes & Sections
+          </h1>
+
           <p className="text-xs text-muted-foreground mt-0.5">
-            Configure master school classes, sub-sections, seat capacities, and session-based occupancy.
+            Configure master school classes,
+            sub-sections, seat capacities, and
+            session-based occupancy.
           </p>
         </div>
 
-        {/* Academic Year Selector Switcher */}
+        {/* ====================================================
+            ACADEMIC YEAR SELECTOR
+        ==================================================== */}
+
         <div className="flex items-center space-x-3 bg-zinc-50 dark:bg-zinc-800/50 p-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
+
           <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
+
           <div className="space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Active Academic Session</p>
+
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Academic Session
+            </p>
+
             <Select
               value={selectedAcademicYearId}
-              onValueChange={(val) => setUserSelectedAcademicYearId(val ?? "")}
+              onValueChange={
+                handleAcademicYearChange
+              }
+              disabled={
+                isLoadingAcademicYears ||
+                academicYears.length === 0
+              }
             >
               <SelectTrigger className="h-8 w-48 text-xs font-semibold bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 rounded-xl">
-                <SelectValue placeholder="Select session">
-                  {selectedYearObject?.name || "Select Session"}
-                </SelectValue>
+                <SelectValue placeholder="Select session" />
               </SelectTrigger>
+
               <SelectContent className="text-xs rounded-xl">
-                {academicYears.map((ay) => (
-                  <SelectItem key={ay.id} value={ay.id}>
-                    <div className="flex items-center justify-between w-full gap-2">
-                      <span>{ay.name}</span>
-                      {(ay.status === "ACTIVE" || ay.isActive) && (
-                        <span className="text-[10px] text-emerald-600 font-semibold">(Active)</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
+                {academicYears.map(
+                  (academicYear) => (
+                    <SelectItem
+                      key={
+                        academicYear.id
+                      }
+                      value={
+                        academicYear.id
+                      }
+                    >
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span>
+                          {
+                            academicYear.name
+                          }
+                        </span>
+
+                        {(academicYear.status ===
+                          "ACTIVE" ||
+                          academicYear.isActive ===
+                            true) && (
+                          <span className="text-[10px] text-emerald-600 font-semibold">
+                            (Active)
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
+
           </div>
         </div>
       </div>
 
-      {/* Two Column Layout */}
+      {/* ======================================================
+          NO ACTIVE ACADEMIC YEAR
+      ====================================================== */}
+
+      {!isLoadingAcademicYears &&
+        !activeYear && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-4 text-sm text-amber-800 dark:text-amber-300">
+            No active academic year is
+            configured. Please activate an
+            academic year before configuring
+            classes and sections.
+          </div>
+        )}
+
+      {/* ======================================================
+          MAIN CONTENT
+      ====================================================== */}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left Column: Classes Table */}
+
+        {/* ====================================================
+            CLASSES
+        ==================================================== */}
+
         <div className="lg:col-span-7">
+
           <ClassesTable
             classes={classes}
-            selectedClassId={selectedClassId}
-            onSelectClass={handleSelectClass}
-            onOpenCreateDialog={handleOpenCreateDialog}
-            onOpenEditDialog={handleOpenEditDialog}
-            onDeleteClass={handleTriggerDeleteClass}
-            isLoading={isLoadingClasses}
+            selectedClassId={
+              selectedClassId
+            }
+            onSelectClass={
+              handleSelectClass
+            }
+            onOpenCreateDialog={
+              handleOpenCreateDialog
+            }
+            onOpenEditDialog={
+              handleOpenEditDialog
+            }
+            onDeleteClass={
+              handleTriggerDeleteClass
+            }
+            isLoading={
+              isClassesLoading ||
+              isFetchingClasses
+            }
           />
+
         </div>
 
-        {/* Right Column: Selected Class Configuration Workspace */}
+        {/* ====================================================
+            CONFIGURATION / SECTIONS
+        ==================================================== */}
+
         <div className="flex flex-col gap-6 lg:col-span-5">
+
           {selectedClass ? (
             <>
-              {/* Dynamic Live Occupancy Filtered by Session */}
-              <OccupancyCard report={occupancyReport} isLoading={isLoadingOccupancy} />
 
-              {/* Class Configuration Settings Card */}
-              <ConfigurationCard
-                classId={selectedClass.id}
-                className={selectedClass.name}
-                configuration={configuration}
-                onSave={handleSaveConfiguration}
-                isSaving={updateConfigMutation.isPending}
+              {/* OCCUPANCY */}
+
+              <OccupancyCard
+                report={occupancyReport}
+                isLoading={
+                  isLoadingOccupancy
+                }
               />
 
-              {/* Sections Management Card */}
+              {/* CONFIGURATION */}
+
+              <ConfigurationCard
+                academicYearId={
+                  selectedAcademicYearId
+                }
+                classId={
+                  selectedClass.id
+                }
+                className={
+                  selectedClass.name
+                }
+                configuration={
+                  configuration
+                }
+                onSave={
+                  handleSaveConfiguration
+                }
+                isSaving={
+                  updateConfigMutation.isPending
+                }
+              />
+
+              {/* SECTIONS */}
+
               {configuration?.sectionsEnabled && (
                 <SectionsCard
                   sections={sections}
-                  classId={selectedClass.id}
-                  onCreateSection={handleCreateSection}
-                  onDeleteSection={handleTriggerDeleteSection}
-                  isCreating={createSectionMutation.isPending}
+                  classId={
+                    selectedClass.id
+                  }
+                  onCreateSection={
+                    handleCreateSection
+                  }
+                  onDeleteSection={
+                    handleTriggerDeleteSection
+                  }
+                  isCreating={
+                    createSectionMutation.isPending
+                  }
                 />
               )}
+
             </>
           ) : (
             <div className="flex h-64 items-center justify-center rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Select a class from the table on the left to configure settings and sections.
+
+              {selectedAcademicYearId
+                ? "No classes are assigned to this academic year yet."
+                : "Select an academic year first."}
+
             </div>
           )}
+
         </div>
       </div>
 
-      {/* Create / Edit Dialog Modal */}
+      {/* ======================================================
+          CREATE / EDIT CLASS DIALOG
+      ====================================================== */}
+
       <ClassDialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        initialData={editingClass}
-        onSubmit={handleSaveClass}
-        isSubmitting={createClassMutation.isPending || updateClassMutation.isPending}
+        onOpenChange={
+          setIsDialogOpen
+        }
+        initialData={
+          editingClass
+        }
+        onSubmit={
+          handleSaveClass
+        }
+        isSubmitting={
+          createClassMutation.isPending ||
+          updateClassMutation.isPending
+        }
       />
 
-      {/* Modern Section Delete Confirmation Modal */}
+      {/* ======================================================
+          DELETE SECTION DIALOG
+      ====================================================== */}
+
       <AlertDialog
-        open={Boolean(deletingSectionId)}
-        onOpenChange={(open) => !open && setDeletingSectionId(null)}
+        open={Boolean(
+          deletingSectionId
+        )}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingSectionId(null);
+          }
+        }}
       >
         <AlertDialogContent>
+
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Section?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete Section?
+            </AlertDialogTitle>
+
             <AlertDialogDescription>
-              This action cannot be undone. You can only delete this section if it has zero active student enrollments.
+              This action cannot be undone.
+              You can only delete this
+              section if it has zero active
+              student enrollments.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogCancel>
+              Cancel
+            </AlertDialogCancel>
+
             <AlertDialogAction
-              onClick={handleConfirmDeleteSection}
+              onClick={
+                handleConfirmDeleteSection
+              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete Section
             </AlertDialogAction>
+
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modern Class Delete Confirmation Modal */}
+      {/* ======================================================
+          DELETE CLASS DIALOG
+      ====================================================== */}
+
       <AlertDialog
-        open={Boolean(deletingClassId)}
-        onOpenChange={(open) => !open && setDeletingClassId(null)}
+        open={Boolean(
+          deletingClassId
+        )}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingClassId(null);
+          }
+        }}
       >
         <AlertDialogContent>
+
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Class?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete Class?
+            </AlertDialogTitle>
+
             <AlertDialogDescription>
-              Are you sure you want to delete this class? This action will fail if active student enrollments exist.
+              Are you sure you want to delete
+              this class? This action will
+              fail if active student
+              enrollments exist.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogCancel>
+              Cancel
+            </AlertDialogCancel>
+
             <AlertDialogAction
-              onClick={handleConfirmDeleteClass}
+              onClick={
+                handleConfirmDeleteClass
+              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete Class
             </AlertDialogAction>
+
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
+
     </div>
   );
 }

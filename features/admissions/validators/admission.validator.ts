@@ -1,3 +1,5 @@
+// features/admissions/validators/admission.validator.ts
+
 import { z } from "zod";
 import { AdmissionType, Medium, Stream } from "@prisma/client";
 
@@ -23,7 +25,6 @@ export const step3AcademicAdmissionSchema = z.object({
     error: "Invalid Class selection.",
   }),
 
-  // Make Section optional (allows UUID, empty string, null, or undefined)
   sectionId: z
     .string()
     .uuid()
@@ -85,7 +86,6 @@ export const createAdmissionSchema = z.object({
     error: "Invalid Class ID.",
   }),
 
-  // Make Section optional on API creation payload
   sectionId: z
     .string()
     .uuid()
@@ -124,6 +124,40 @@ export const createAdmissionSchema = z.object({
   isTransportRequired: z.boolean().default(false),
 
   remarks: z.string().trim().nullable().optional(),
+
+  // --- FEE CONCESSION & INSTALLMENT SELECTION ---
+  feeStructureId: z.string().uuid({
+    error: "Invalid Fee Structure ID.",
+  }),
+
+  concession: z
+    .object({
+      discountType: z.string().trim().min(1, "Discount type is required."),
+      discountAmount: z.number().nonnegative("Discount amount cannot be negative."),
+      description: z.string().trim().max(255).nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+
+  installmentPlanId: z
+    .string()
+    .cuid()
+    .or(z.string().uuid())
+    .nullable()
+    .optional(),
+
+  // 👈 ADDED INSTALLMENTS ARRAY SCHEMA DEFINITION
+  installments: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1, "Installment name is required."),
+        dueDate: z.string().nullable().optional(),
+        value: z.number().nonnegative("Installment amount cannot be negative."),
+        componentIds: z.array(z.string()).optional(),
+      })
+    )
+    .nullable()
+    .optional(),
 
   tenantId: z
     .string()

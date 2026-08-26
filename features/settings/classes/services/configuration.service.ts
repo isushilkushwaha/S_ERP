@@ -1,43 +1,145 @@
+import {
+  PrismaClient,
+  AcademicYearClass,
+} from "@prisma/client";
 
-
-import { PrismaClient, ClassConfiguration } from "@prisma/client";
-import { ConfigurationRepository, UpsertConfigurationInput } from "../repositories/configuration.repository";
+import {
+  ConfigurationRepository,
+  UpsertConfigurationInput,
+} from "../repositories/configuration.repository";
 
 export class ConfigurationService {
-  private configRepo: ConfigurationRepository;
+  private readonly configRepo: ConfigurationRepository;
 
-  constructor(private readonly prisma: PrismaClient) {
-    this.configRepo = new ConfigurationRepository(prisma);
+  constructor(
+    private readonly prisma: PrismaClient
+  ) {
+    this.configRepo =
+      new ConfigurationRepository(prisma);
   }
 
   /**
-   * Fetches configuration settings for a given class ID.
+   * Get configuration for a class
+   * in a specific academic year.
    */
-  async getConfigurationByClassId(classId: string): Promise<ClassConfiguration> {
-    const config = await this.configRepo.findByClassId(classId);
+  async getConfigurationByClassId(
+    academicYearId: string,
+    classId: string
+  ): Promise<AcademicYearClass> {
+    const config =
+      await this.configRepo.findByClassId(
+        academicYearId,
+        classId
+      );
+
     if (!config) {
-      throw new Error(`Configuration settings for Class ID "${classId}" were not found.`);
+      throw new Error(
+        `Configuration for Class ID "${classId}" was not found in the selected academic year.`
+      );
     }
+
     return config;
   }
 
   /**
-   * Updates or creates configuration settings for a class with capacity rule enforcement.
+   * Create/update configuration for a
+   * class in an academic year.
    */
-  async updateConfiguration(dto: UpsertConfigurationInput): Promise<ClassConfiguration> {
-    // Rule 1: If sections are disabled, maxStudentsWithoutSection must be positive
+  async updateConfiguration(
+tenantId: string, dto: UpsertConfigurationInput  ): Promise<AcademicYearClass> {
+    // ---------------------------------------------
+    // Validate academic year
+    // ---------------------------------------------
+
+    const academicYear =
+      await this.prisma.academicYear.findFirst({
+        where: {
+          id: dto.academicYearId,
+          deletedAt: null,
+        },
+      });
+
+    if (!academicYear) {
+      throw new Error(
+        `Academic year "${dto.academicYearId}" was not found.`
+      );
+    }
+
+    // ---------------------------------------------
+    // Validate class
+    // ---------------------------------------------
+
+    const classRecord =
+      await this.prisma.class.findFirst({
+        where: {
+          id: dto.classId,
+          tenantId: undefined,
+          deletedAt: null,
+        },
+      });
+
+    if (!classRecord) {
+      throw new Error(
+        `Class "${dto.classId}" was not found.`
+      );
+    }
+
+    // ---------------------------------------------
+    // Validate assignment
+    // ---------------------------------------------
+
+    const assignment =
+      await this.prisma.academicYearClass.findUnique({
+        where: {
+          unique_academic_year_class: {
+            academicYearId:
+              dto.academicYearId,
+
+            classId:
+              dto.classId,
+          },
+        },
+      });
+
+    if (!assignment) {
+      throw new Error(
+        `Class "${dto.classId}" is not assigned to the selected academic year.`
+      );
+    }
+
+    // ---------------------------------------------
+    // Rule 1
+    // ---------------------------------------------
+
     if (!dto.sectionsEnabled) {
-      if (!dto.maxStudentsWithoutSection || dto.maxStudentsWithoutSection <= 0) {
+      if (
+        dto.maxStudentsWithoutSection ===
+          null ||
+        dto.maxStudentsWithoutSection ===
+          undefined ||
+        dto.maxStudentsWithoutSection <= 0
+      ) {
         throw new Error(
-          "Maximum student capacity ('maxStudentsWithoutSection') must be greater than zero when sections are disabled."
+          "Maximum student capacity must be greater than zero when sections are disabled."
         );
       }
     }
 
-    // Rule 2: If sections are enabled, defaultSectionCapacity must be positive
-    if (dto.sectionsEnabled && dto.defaultSectionCapacity) {
-      if (dto.defaultSectionCapacity <= 0) {
-        throw new Error("Default section capacity must be a positive integer greater than zero.");
+    // ---------------------------------------------
+    // Rule 2
+    // ---------------------------------------------
+
+    if (dto.sectionsEnabled) {
+      if (
+        dto.defaultSectionCapacity ===
+          null ||
+        dto.defaultSectionCapacity ===
+          undefined ||
+        dto.defaultSectionCapacity <= 0
+      ) {
+        throw new Error(
+          "Default section capacity must be greater than zero when sections are enabled."
+        );
       }
     }
 
@@ -45,33 +147,47 @@ export class ConfigurationService {
   }
 
   /**
-   * Hard-deletes configuration settings for a class permanently.
+   * Delete configuration for a specific
+   * academic year/class assignment.
    */
-  async deleteConfigurationByClassId(classId: string): Promise<void> {
-    const config = await this.configRepo.findByClassId(classId);
+  async deleteConfiguration(
+    academicYearId: string,
+    classId: string
+  ): Promise<void> {
+    const config =
+      await this.configRepo.findByClassId(
+        academicYearId,
+        classId
+      );
+
     if (!config) {
-      return; // Already non-existent, idempotent success
+      return;
     }
 
-    // Dependency Guard: Check if students are enrolled in this class directly without a section
-    const unsectionedEnrollments = await this.prisma.studentEnrollment.count({
-      where: {
-        class: {
-          id: classId,
-        },
-        // ✅ Fixed: Use empty string or omit null if sectionId is non-nullable string in Prisma
-        sectionId: "", 
-      },
-    });
+    // ---------------------------------------------
+    // Dependency check
+    //
+    // Check enrollments belonging to this
+    // academic year + class.
+    // ---------------------------------------------
 
-    if (unsectionedEnrollments > 0) {
+    const enrollmentCount =
+      await this.prisma.studentEnrollment.count({
+        where: {
+          academicYearId,
+          classId,
+        },
+      });
+
+    if (enrollmentCount > 0) {
       throw new Error(
-        `Cannot delete class configuration. There are ${unsectionedEnrollments} student enrollment(s) relying on this unsectioned class configuration.`
+        `Cannot delete configuration. There are ${enrollmentCount} student enrollment(s) using this class in the selected academic year.`
       );
     }
 
-    await this.prisma.classConfiguration.delete({
-      where: { classId },
-    });
+    await this.configRepo.delete(
+      academicYearId,
+      classId
+    );
   }
 }

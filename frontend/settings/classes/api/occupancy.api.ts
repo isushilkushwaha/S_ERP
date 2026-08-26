@@ -1,21 +1,47 @@
 import fetcher from "./client";
-import { ClassOccupancyReport, AutoAllocationResult } from "../types/occupancy";
+import {
+  ClassOccupancyReport,
+  AutoAllocationResult,
+} from "../types/occupancy";
 
 export const occupancyApi = {
   /**
-   * Get dynamic occupancy report for a class
+   * Get occupancy for a class in a specific academic year.
    */
-  async getClassOccupancy(classId: string | undefined, academicYearId: string | undefined): Promise<ClassOccupancyReport> {
-    return fetcher<ClassOccupancyReport>(`/api/settings/classes/occupancy?classId=${classId}`);
+  async getClassOccupancy(
+    classId: string,
+    academicYearId?: string
+  ): Promise<ClassOccupancyReport> {
+    const params = new URLSearchParams();
+
+    params.set("classId", classId);
+
+    if (academicYearId) {
+      params.set(
+        "academicYearId",
+        academicYearId
+      );
+    }
+
+    return fetcher<ClassOccupancyReport>(
+      `/api/settings/classes/occupancy?${params.toString()}`
+    );
   },
 
   /**
-   * Trigger auto section allocation engine
+   * Trigger automatic section allocation.
    */
-  async allocateSection(classId: string): Promise<AutoAllocationResult> {
-    return fetcher<AutoAllocationResult>("/api/settings/classes/auto-allocation", {
-      method: "POST",
-      body: JSON.stringify({ classId }),
-    });
+  async allocateSection(
+    classId: string
+  ): Promise<AutoAllocationResult> {
+    return fetcher<AutoAllocationResult>(
+      "/api/settings/classes/auto-allocation",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          classId,
+        }),
+      }
+    );
   },
 };

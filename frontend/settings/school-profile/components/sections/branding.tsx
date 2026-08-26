@@ -1,3 +1,5 @@
+// frontend/settings/school-profile/components/sections/branding.tsx
+
 "use client";
 
 import { useFormContext } from "react-hook-form";
@@ -33,12 +35,14 @@ export function Branding() {
         name="logoUrl"
         render={({ field }) => (
           <FormItem>
-            
-
             <FormControl>
               <ImageUpload
-                value={field.value}
-                onChange={field.onChange}
+                // 1. Convert null or empty strings to undefined to match ImageUploadProps
+                value={field.value && field.value.trim() !== "" ? field.value : undefined}
+                onChange={(url) => {
+                  // 2. Pass undefined or empty string instead of null on change/clear
+                  field.onChange(url && url.trim() !== "" ? url : "");
+                }}
                 uploadUrl="/api/uploads/school-logo"
                 label="School Logo"
                 description="Upload your school's official logo. Supported formats: PNG, JPG, WEBP. Maximum size: 2 MB."

@@ -32,17 +32,22 @@ export async function GET(req: NextRequest) {
     const nextAdmSeq = (admCounter?.lastAdmissionSequence || 0) + 1;
     const admissionNumber = `${prefix}-${startYear}-${String(nextAdmSeq).padStart(4, "0")}`;
 
-    // 4. Fetch current roll number counter using findFirst (safe for any compound schema setup)
+    // 4. ROBUST ROLL NUMBER EVALUATION:
+    // Instead of trusting a global tracking table that might have been inflated during testing,
+    // count the actual active student enrollments currently assigned to this specific Class and Section.
     let nextRollNumber = 1;
     if (classId && sectionId) {
-      const rollCounter = await prisma.rollNumberCounter.findFirst({
+      const activeEnrollmentsCount = await prisma.studentEnrollment.count({
         where: {
           academicYearId,
           classId,
           sectionId,
+          status: "ACTIVE",
         },
       });
-      nextRollNumber = (rollCounter?.lastRollNumber || 0) + 1;
+
+      // If records exist, the next roll number is count + 1. Otherwise, it safely starts at 1!
+      nextRollNumber = activeEnrollmentsCount + 1;
     }
 
     return NextResponse.json({

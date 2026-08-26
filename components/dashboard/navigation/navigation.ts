@@ -78,8 +78,8 @@ export const navigation: readonly NavigationItem[] = [
     permission: PERMISSIONS.FEES_VIEW,
     children: [
       {
-        id: "fee-collection",
-        title: "Fee Collection",
+        id: "Fee Dashboard",
+        title: "Fee Dashboard",
         href: "/fees",
         permission: PERMISSIONS.FEES_VIEW,
       },
@@ -204,6 +204,13 @@ export const navigation: readonly NavigationItem[] = [
         id: "fee-management",
         title: "Fee Management",
         href: "/settings/fee-management",
+        permission: PERMISSIONS.SETTINGS_VIEW,
+      },
+      
+      {
+        id: "Installment Plans",
+        title: "Installment Plans",
+        href: "/settings/fees/installment-plans",
         permission: PERMISSIONS.SETTINGS_VIEW,
       },
 

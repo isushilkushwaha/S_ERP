@@ -30,7 +30,7 @@ export function FeeComponentTable({ tenantId }: Props) {
   const { data, isLoading, isError, error } = useFeeComponentsQuery({
     tenantId,
     page,
-    limit: 10,
+    limit: 100,
     search,
     status: statusFilter,
   });
@@ -110,8 +110,9 @@ export function FeeComponentTable({ tenantId }: Props) {
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full text-left text-sm text-zinc-700 dark:text-zinc-300">
-            <thead className="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+          <div className="max-h-[520px] overflow-auto">
+          <table className="min-w-[1000px] w-full text-left text-sm text-zinc-700 dark:text-zinc-300">
+            <thead className="sticky top-0 z-10 bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
               <tr>
                 <th className="px-4 py-3 w-16 text-center">Order</th>
                 <th className="px-4 py-3">Name</th>
@@ -228,6 +229,7 @@ export function FeeComponentTable({ tenantId }: Props) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

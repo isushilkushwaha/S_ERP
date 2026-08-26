@@ -73,7 +73,7 @@ export function FeeStructureTable({ tenantId }: Props) {
   const { data, isLoading, isError, error } = useFeeStructuresQuery({
     tenantId,
     page,
-    limit: 10,
+    limit: 100,
     academicYearId: selectedYear || undefined,
     classId: selectedClass || undefined,
     status: selectedStatus,
@@ -177,6 +177,7 @@ export function FeeStructureTable({ tenantId }: Props) {
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <div className="max-h-[520px] overflow-auto">
           <table className="w-full text-left text-sm text-zinc-700 dark:text-zinc-300">
             <thead className="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
               <tr>
@@ -327,6 +328,7 @@ export function FeeStructureTable({ tenantId }: Props) {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

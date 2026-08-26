@@ -35,8 +35,9 @@ export default function SchoolProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
 
+  // 👈 Fix: Safely handle both null and undefined states
   const hasProfile = profile != null;
-  const isCreateMode = profile === null;
+  const isCreateMode = !profile;
 
   async function handleSubmit(values: SchoolProfileFormValues) {
     if (isCreateMode) {

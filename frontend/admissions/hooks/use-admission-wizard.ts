@@ -1,3 +1,5 @@
+// frontend/admissions/hooks/use-admission-wizard.ts
+
 import { useState } from "react";
 import { 
   StudentRegistrationSummaryDTO, 
@@ -35,7 +37,8 @@ export function useAdmissionWizard() {
   const goToNextStep = () => {
     setWizardState((prev) => ({
       ...prev,
-      currentStep: Math.min(prev.currentStep + 1, 5),
+      // Updated upper limit from 5 to 6
+      currentStep: Math.min(prev.currentStep + 1, 6),
     }));
   };
 
@@ -47,7 +50,8 @@ export function useAdmissionWizard() {
   };
 
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= 5) {
+    // Updated upper limit from 5 to 6
+    if (step >= 1 && step <= 6) {
       setWizardState((prev) => ({ ...prev, currentStep: step }));
     }
   };

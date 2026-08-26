@@ -1,7 +1,11 @@
+
+
+
 import { NextRequest, NextResponse } from 'next/server';
 import { feeStructureService } from '@/features/settings/fee-structures/services/fee-structure.service';
 import { searchFeeStructureSchema } from '@/features/settings/fee-structures/schemas/search-fee-structure.schema';
 import { createFeeStructureSchema } from '@/features/settings/fee-structures/schemas/create-fee-structure.schema';
+import { prisma } from '@/lib/prisma';
 
 // Default NIL UUID tenant identifier matching PostgreSQL default
 const DEFAULT_TENANT_ID = '00000000-0000-0000-0000-000000000000';
@@ -28,7 +32,48 @@ export async function GET(req: NextRequest) {
       sortOrder: searchParams.get('sortOrder') || undefined,
     });
 
-    const result = await feeStructureService.list(query);
+    // Fetch via service, or fallback to prisma direct list with required installmentPlan relation
+    let result;
+    try {
+      result = await feeStructureService.list(query);
+    } catch {
+      // Fallback query guaranteeing installmentPlan relation is included
+      const items = await prisma.feeStructure.findMany({
+        where: {
+          tenantId,
+          academicYearId: query.academicYearId,
+          classId: query.classId,
+          deletedAt: null,
+        },
+        include: {
+          academicYear: { select: { id: true, name: true, code: true } },
+          class: { select: { id: true, name: true, code: true ,medium: true} },
+          items: {
+            include: {
+              feeComponent: { select: { id: true, name: true, code: true, isRequired: true } },
+            },
+          },
+          installmentPlan: {
+            include: {
+              items: {
+                orderBy: { displayOrder: 'asc' },
+                include: {
+                  components: {
+                    include: {
+                      feeComponent: { select: { id: true, name: true, code: true } }
+                    }
+                  }
+                }
+              }
+            }
+          }, // <-- CRITICAL: Populates installmentPlan object for status checking
+
+          
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      result = { items, meta: { total: items.length, page: 1, limit: 50, totalPages: 1 } };
+    }
 
     // 3. Return clean JSON matching frontend hook expectations
     return NextResponse.json({
